@@ -14,7 +14,7 @@ data class UserCreateRequest(
     @field:Size(min = 1, max = 60, message = "Name must be between 1 and 60")
     val fullName: String? = null,
 
-    @field:Size(min = 1, max = 60, message = "Username must be between 1 and 60")
+    @field:Size(min = 3, max = 60, message = "Username must be between 1 and 60")
     @field:NotBlank(message = "Username cannot be blank")
     val username: String,
 
@@ -37,4 +37,21 @@ data class UserResponse(
     val email: String,
     val bio: String? = null,
     val deleted: Boolean
+)
+
+data class UserUpdateRequest(
+    @field:Size(min = 1, max = 60, message = "Name must be between 1 and 60")
+    val fullName: String? = null,
+
+    @field:Size(min = 3, max = 60, message = "Username must be between 1 and 60")
+    val username: String? = null,
+
+    @field:Email(message = "Email must be valid")
+    val email: String? = null,
+
+    @field:Size(min = 6, max = 60, message = "Password must be between 1 and 60")
+    val password: String? = null,
+
+    @field:Size(min = 6, max = 60, message = "Username must be between 1 and 60")
+    val bio: String? = null,
 )

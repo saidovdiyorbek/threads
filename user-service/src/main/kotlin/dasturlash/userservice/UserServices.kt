@@ -6,6 +6,7 @@ interface UserServices {
     fun create(request: UserCreateRequest)
     fun getOne(id: Long): UserResponse
     fun getAll(): List<UserResponse>
+    fun update(id: Long, request: UserUpdateRequest)
 }
 
 @Service
@@ -57,5 +58,23 @@ class UserServiceImpl(
             ))
         }
         return findUser
+    }
+
+    override fun update(id: Long, request: UserUpdateRequest) {
+        repository.findByIdAndDeletedFalse(id)?.let { user ->
+            request.username?.let { repository.existsByUsername(it).takeIf { it }?.let {
+                throw UsernameAlreadyExistsException()
+                }
+                user.fullname = it
+            }
+            request.email?.let { repository.existsByEmail(it).takeIf { it }?.let {
+                throw EmailAlreadyExistsException()
+                }
+                user.email = it
+            }
+            request.password?.let { user.password = it }
+            request.bio?.let { user.bio = it }
+            repository.save(user)
+        }
     }
 }
