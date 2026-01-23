@@ -8,11 +8,13 @@ interface UserServices {
     fun getAll(): List<UserResponse>
     fun update(id: Long, request: UserUpdateRequest)
     fun delete(id: Long)
+    fun follow(followRequest: FollowRequest)
 }
 
 @Service
 class UserServiceImpl(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val userFollow: UserFollowRepository
 
 ) : UserServices {
     override fun create(request: UserCreateRequest) {
@@ -29,6 +31,8 @@ class UserServiceImpl(
             email = request.email,
             password = request.password,
             bio = request.bio?.let { it } as String,
+            status = UserStatus.ACTIVE,
+            role = request.role,
         ))
     }
 
@@ -41,6 +45,7 @@ class UserServiceImpl(
                 user.email,
                 user.bio?.let { it } as String,
                 user.deleted,
+                user.status,
             )
         }
         throw UserNotFoundException()
@@ -56,6 +61,7 @@ class UserServiceImpl(
                 email = user.email,
                 bio = user.bio?.let { it } as String,
                 deleted = user.deleted,
+                status = user.status,
             ))
         }
         return findUser
