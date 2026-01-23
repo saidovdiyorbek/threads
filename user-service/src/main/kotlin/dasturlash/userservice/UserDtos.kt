@@ -28,6 +28,9 @@ data class UserCreateRequest(
 
     @field:Size(min = 6, max = 60, message = "Username must be between 1 and 60")
     val bio: String? = null,
+
+    @field:NotNull(message = "Role cannot be null")
+    val role: UserRole,
 )
 
 data class UserResponse(
