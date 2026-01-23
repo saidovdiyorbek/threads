@@ -7,6 +7,7 @@ interface UserServices {
     fun getOne(id: Long): UserResponse
     fun getAll(): List<UserResponse>
     fun update(id: Long, request: UserUpdateRequest)
+    fun delete(id: Long)
 }
 
 @Service
@@ -76,5 +77,12 @@ class UserServiceImpl(
             request.bio?.let { user.bio = it }
             repository.save(user)
         }
+    }
+
+    override fun delete(id: Long) {
+        repository.findByIdAndDeletedFalse(id)?.let { user ->
+            repository.trash(id)
+        }
+        throw UserNotFoundException()
     }
 }
