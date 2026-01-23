@@ -85,4 +85,24 @@ class UserServiceImpl(
         }
         throw UserNotFoundException()
     }
+
+    override fun follow(followRequest: FollowRequest) {
+        repository.findByIdAndDeletedFalse(followRequest.profileId)?.let { profile ->
+            // follow bosilayotgan profile user ekanligini tekshirayapmiz
+            repository.findByIdAndRoleUser(followRequest.followId)?.let { follow ->
+                val checkFollowing = userFollow.checkFollowing(followRequest.profileId, followRequest.followId)
+                if (!checkFollowing){
+                    userFollow.save(UserFollow(
+                        // follow qilayotgan user
+                        profile = profile,
+                        // follow bosilayotgan user
+                        follow = follow
+                    ))
+                    return
+                }
+                return
+            }
+        }
+        throw UserNotFoundException()
+    }
 }

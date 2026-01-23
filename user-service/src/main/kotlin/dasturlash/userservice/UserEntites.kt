@@ -37,4 +37,15 @@ class User(
     @Column(nullable = false, unique = true) var email: String,
     @Column(nullable = false)var password: String,
     var bio: String? = null,
+    @Enumerated(EnumType.STRING) var status: UserStatus,
+    @Enumerated(EnumType.STRING) var role: UserRole,
+    ) : BaseEntity()
+
+@Entity
+class UserFollow(
+    @ManyToOne(fetch = FetchType.LAZY)
+    var profile: User,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    var follow: User
 ) : BaseEntity()

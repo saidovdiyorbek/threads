@@ -30,4 +30,7 @@ class UserController(
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long)  = service.delete(id)
+
+    @PostMapping("/follow")
+    fun follow(@RequestBody followRequest: FollowRequest) = service.follow(followRequest)
 }

@@ -55,3 +55,10 @@ data class UserUpdateRequest(
     @field:Size(min = 6, max = 60, message = "Username must be between 1 and 60")
     val bio: String? = null,
 )
+
+data class FollowRequest(
+    @field:NotNull
+    val profileId: Long,
+    @field:NotNull
+    val followId: Long
+)

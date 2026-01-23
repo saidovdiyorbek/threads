@@ -49,3 +49,14 @@ interface UserRepository : BaseRepository<User>{
     fun existsByUsername(username: String): Boolean
     fun existsByEmail(email: String): Boolean
 }
+
+interface UserFollowRepository : BaseRepository<UserFollow> {
+    @Query("""
+        select case 
+            when count(uf) > 0 then true else false
+        end
+        from UserFollow uf
+        where uf.profile.id = ?1 and uf.follow.id = ?2
+    """)
+    fun checkFollowing(profileId: Long,  follow: Long): Boolean
+}
