@@ -6,3 +6,11 @@ enum class ErrorCode(val code: Int, val message: String) {
     USERNAME_ALREADY_EXISTS(103, "USERNAME_ALREADY_EXISTS"),
 
 }
+
+enum class UserStatus {
+    ACTIVE, INACTIVE, PENDING, REJECTED, BLOCK
+}
+
+enum class UserRole{
+    ROLE_ADMIN, ROLE_USER, ROLE_PUBLISHER
+}
