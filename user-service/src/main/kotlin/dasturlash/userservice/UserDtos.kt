@@ -39,7 +39,8 @@ data class UserResponse(
     val username: String,
     val email: String,
     val bio: String? = null,
-    val deleted: Boolean
+    val deleted: Boolean,
+    val status: UserStatus
 )
 
 data class UserUpdateRequest(
