@@ -36,4 +36,7 @@ class UserController(
 
     @DeleteMapping("/unfollow")
     fun unfollow(@RequestBody unfollowRequest: UnfollowRequest) = service.unfollow(unfollowRequest)
+
+    @GetMapping("/view-profile/{id}")
+    fun viewProfile(@PathVariable id: Long): ProfileResponse = service.viewProfile(id)
 }

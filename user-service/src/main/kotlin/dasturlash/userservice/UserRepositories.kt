@@ -72,6 +72,12 @@ interface UserRepository : BaseRepository<User>{
     @Modifying
     @Query("UPDATE User u SET u.followingCount = u.followingCount - 1 WHERE u.id = :userId")
     fun decrementFollowing(userId: Long)
+
+    @Query("""
+        select u from User u
+        where u.id = ?1 and u.role = 'ROLE_USER' and u.deleted = false and u.status = 'ACTIVE'
+    """)
+    fun getUserForProfile(userId: Long): User?
 }
 
 interface UserFollowRepository : BaseRepository<UserFollow> {

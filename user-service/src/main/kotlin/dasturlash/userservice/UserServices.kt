@@ -11,6 +11,7 @@ interface UserServices {
     fun delete(id: Long)
     fun follow(followRequest: FollowRequest)
     fun unfollow(unfollowRequest: UnfollowRequest)
+    fun viewProfile(id: Long): ProfileResponse
 }
 
 @Service
@@ -133,6 +134,24 @@ class UserServiceImpl(
                 throw UserAlreadyUnfollowedOrSelfUnfollowException()
             }
             throw FollowingOrUnfollowingUserNotFoundException()
+        }
+        throw UserNotFoundException()
+    }
+
+    override fun viewProfile(id: Long): ProfileResponse {
+        repository.getUserForProfile(id)?.let { user ->
+            val followers = userFollow.getFollowers(user.id!!)
+            val following = userFollow.getFollowing(user.id!!)
+            val posts = user.postCount
+
+            return ProfileResponse(
+                id = user.id!!,
+                fullName = user.fullname?.let { it } as String,
+                username = user.username,
+                postCount = posts,
+                followersCount = followers,
+                followingCount = following,
+            )
         }
         throw UserNotFoundException()
     }

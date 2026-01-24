@@ -74,3 +74,12 @@ data class UnfollowRequest(
     @field:NotNull
     val followId: Long
 )
+
+data class ProfileResponse(
+    val id: Long,
+    val fullName: String? = null,
+    val username: String,
+    val postCount: Int,
+    val followersCount: Int,
+    val followingCount: Int,
+)
