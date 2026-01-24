@@ -24,7 +24,7 @@ interface AttachService {
 @Service
 class AttachServiceImpl(
     @Value("\${attach.upload.folder}")private val folderName: String,
-    @Value("\${attch.url}")private val attachUrl: String,
+    @Value("\${attach.url}")private val attachUrl: String,
 
     private val repository: AttachRepository,
     private val hash: GenerateHash
