@@ -1,5 +1,6 @@
 package dasturlash.userservice
 
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 interface UserServices {
@@ -92,13 +93,13 @@ class UserServiceImpl(
         }
         throw UserNotFoundException()
     }
-
+    @Transactional
     override fun follow(followRequest: FollowRequest) {
         repository.findByIdAndDeletedFalse(followRequest.profileId)?.let { profile ->
             // follow bosilayotgan profile user ekanligini tekshirayapmiz
             repository.findByIdAndRoleUser(followRequest.followId)?.let { follow ->
                 val checkFollowing = userFollow.checkFollowing(followRequest.profileId, followRequest.followId)
-                if (!checkFollowing){
+                if (!checkFollowing && followRequest.profileId != followRequest.followId) {
                     userFollow.save(UserFollow(
                         // follow qilayotgan user
                         profile = profile,
@@ -115,7 +116,7 @@ class UserServiceImpl(
         }
         throw UserNotFoundException()
     }
-
+    @Transactional
     override fun unfollow(unfollowRequest: UnfollowRequest) {
         repository.findByIdAndDeletedFalse(unfollowRequest.profileId)?.let { profile ->
             // follow bosilayotgan profile user ekanligini tekshirayapmiz
