@@ -88,4 +88,17 @@ interface UserFollowRepository : BaseRepository<UserFollow> {
         where u.profile.id = ?1 and u.follow.id = ?2
     """)
     fun checkUnFollowing(profileId: Long, follow: Long): UserFollow?
+
+    @Query("""
+        select count(u)
+        from UserFollow u
+        where u.follow.id = ?1
+    """)
+    fun getFollowers(userId: Long): Int
+
+    @Query("""
+        select count(u) from UserFollow u
+        where u.profile.id = ?1
+    """)
+    fun getFollowing(userId: Long): Int
 }
