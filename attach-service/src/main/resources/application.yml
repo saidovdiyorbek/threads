@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: attach
+  config:
+    import: "configserver:http://user:nimadirxavfsizlik@localhost:8888/"
+  profiles:
+    active: local
