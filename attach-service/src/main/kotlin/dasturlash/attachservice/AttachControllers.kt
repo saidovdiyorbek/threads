@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/attaches")
 class AttachController(
-    private val service: AttachServiceImpl
+    private val service: AttachService
 ){
     @PostMapping("/upload",
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
