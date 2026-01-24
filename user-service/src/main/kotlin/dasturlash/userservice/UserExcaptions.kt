@@ -77,5 +77,11 @@ class UsernameAlreadyExistsException() : UserAppException(){
     override fun errorType() = ErrorCode.USERNAME_ALREADY_EXISTS
 }
 class UserAlreadyFollowedOrSelfFollowException() : UserAppException(){
-    override fun errorType() = ErrorCode.USER_ALREADY_FOLLOWED
+    override fun errorType() = ErrorCode.USER_ALREADY_FOLLOWED_OR_SELF_FOLLOW
+}
+class UserAlreadyUnfollowedOrSelfUnfollowException() : UserAppException(){
+    override fun errorType() = ErrorCode.USER_ALREADY_UNFOLLOWED_OR_SELF_UNFOLLOW
+}
+class FollowingOrUnfollowingUserNotFoundException() : UserAppException(){
+    override fun errorType() = ErrorCode.FOLLOWING_OR_UNFOLLOWING_USER_NOT_FOUND
 }

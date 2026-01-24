@@ -113,6 +113,7 @@ class UserServiceImpl(
                 }
                 throw UserAlreadyFollowedOrSelfFollowException()
             }
+            throw FollowingOrUnfollowingUserNotFoundException()
         }
         throw UserNotFoundException()
     }
@@ -126,11 +127,12 @@ class UserServiceImpl(
                         userFollow.delete(it)
                         repository.decrementFollowers(unfollowRequest.followId)
                         repository.decrementFollowing(unfollowRequest.profileId)
+                        return
                     }
                 }
-                return
+                throw UserAlreadyUnfollowedOrSelfUnfollowException()
             }
-            return
+            throw FollowingOrUnfollowingUserNotFoundException()
         }
         throw UserNotFoundException()
     }
