@@ -32,7 +32,7 @@ class BaseEntity(
 class Attach(
     @Column(nullable = false, name = "origin_name") var originName: String? = null,
     @Column(nullable = false) var size: Long,
-    @Column(nullable = false) var type: String,
+    @Column(nullable = false) var type: String?,
     @Column(nullable = false) var path: String,
     @Column(nullable = false) var fullPath: String,
     @Column(nullable = false) var hash: String,
