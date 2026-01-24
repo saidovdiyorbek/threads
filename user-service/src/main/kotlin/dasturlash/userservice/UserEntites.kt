@@ -43,6 +43,8 @@ class User(
     var bio: String? = null,
     @Enumerated(EnumType.STRING) var status: UserStatus,
     @Enumerated(EnumType.STRING) var role: UserRole,
+    var followersCount: Int = 0,
+    var followingCount: Int = 0,
     ) : BaseEntity()
 
 @Entity
