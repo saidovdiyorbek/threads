@@ -67,3 +67,10 @@ data class FollowRequest(
     @field:NotNull
     val followId: Long
 )
+
+data class UnfollowRequest(
+    @field:NotNull
+    val profileId: Long,
+    @field:NotNull
+    val followId: Long
+)

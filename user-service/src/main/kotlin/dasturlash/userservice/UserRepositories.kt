@@ -65,4 +65,10 @@ interface UserFollowRepository : BaseRepository<UserFollow> {
         where uf.profile.id = ?1 and uf.follow.id = ?2
     """)
     fun checkFollowing(profileId: Long,  follow: Long): Boolean
+
+    @Query("""
+        select u from UserFollow u
+        where u.profile.id = ?1 and u.follow.id = ?2
+    """)
+    fun checkUnFollowing(profileId: Long, follow: Long): UserFollow?
 }

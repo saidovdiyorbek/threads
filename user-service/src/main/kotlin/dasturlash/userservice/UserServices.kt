@@ -9,6 +9,7 @@ interface UserServices {
     fun update(id: Long, request: UserUpdateRequest)
     fun delete(id: Long)
     fun follow(followRequest: FollowRequest)
+    fun unfollow(unfollowRequest: UnfollowRequest)
 }
 
 @Service
@@ -108,6 +109,20 @@ class UserServiceImpl(
                 }
                 return
             }
+        }
+        throw UserNotFoundException()
+    }
+
+    override fun unfollow(unfollowRequest: UnfollowRequest) {
+        repository.findByIdAndDeletedFalse(unfollowRequest.profileId)?.let { profile ->
+            // follow bosilayotgan profile user ekanligini tekshirayapmiz
+            repository.findByIdAndRoleUser(unfollowRequest.followId)?.let { follow ->
+                userFollow.checkUnFollowing(unfollowRequest.profileId, unfollowRequest.followId)?.let {
+                    userFollow.delete(it)
+                }
+                return
+            }
+            return
         }
         throw UserNotFoundException()
     }

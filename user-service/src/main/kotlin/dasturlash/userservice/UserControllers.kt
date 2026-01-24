@@ -33,4 +33,7 @@ class UserController(
 
     @PostMapping("/follow")
     fun follow(@RequestBody followRequest: FollowRequest) = service.follow(followRequest)
+
+    @DeleteMapping("/unfollow")
+    fun unfollow(@RequestBody unfollowRequest: UnfollowRequest) = service.unfollow(unfollowRequest)
 }
