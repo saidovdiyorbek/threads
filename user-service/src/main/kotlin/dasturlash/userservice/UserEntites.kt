@@ -45,6 +45,7 @@ class User(
     @Enumerated(EnumType.STRING) var role: UserRole,
     var followersCount: Int = 0,
     var followingCount: Int = 0,
+    val postCount: Int = 0,
     ) : BaseEntity()
 
 @Entity
