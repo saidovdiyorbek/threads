@@ -54,6 +54,23 @@ interface UserRepository : BaseRepository<User>{
         where u.id = ?1 and u.role = 'ROLE_USER' and u.deleted = false
     """)
     fun findByIdAndRoleUser(id: Long): User?
+
+    @Modifying // Bu o'zgartirish kiritadi degani
+    @Query("UPDATE User u SET u.followersCount = u.followersCount + 1 WHERE u.id = :userId")
+    fun incrementFollowers(userId: Long)
+
+    @Modifying
+    @Query("UPDATE User u SET u.followingCount = u.followingCount + 1 WHERE u.id = :userId")
+    fun incrementFollowing(userId: Long)
+
+    // Unfollow uchun teskarisi (decrement)
+    @Modifying
+    @Query("UPDATE User u SET u.followersCount = u.followersCount - 1 WHERE u.id = :userId")
+    fun decrementFollowers(userId: Long)
+
+    @Modifying
+    @Query("UPDATE User u SET u.followingCount = u.followingCount - 1 WHERE u.id = :userId")
+    fun decrementFollowing(userId: Long)
 }
 
 interface UserFollowRepository : BaseRepository<UserFollow> {

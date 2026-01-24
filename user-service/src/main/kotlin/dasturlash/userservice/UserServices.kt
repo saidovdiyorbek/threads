@@ -105,6 +105,9 @@ class UserServiceImpl(
                         // follow bosilayotgan user
                         follow = follow
                     ))
+
+                    repository.incrementFollowers(followRequest.followId)
+                    repository.incrementFollowing(followRequest.profileId)
                     return
                 }
                 return
@@ -118,7 +121,11 @@ class UserServiceImpl(
             // follow bosilayotgan profile user ekanligini tekshirayapmiz
             repository.findByIdAndRoleUser(unfollowRequest.followId)?.let { follow ->
                 userFollow.checkUnFollowing(unfollowRequest.profileId, unfollowRequest.followId)?.let {
-                    userFollow.delete(it)
+                    if (unfollowRequest.profileId != unfollowRequest.followId) {
+                        userFollow.delete(it)
+                        repository.decrementFollowers(unfollowRequest.followId)
+                        repository.decrementFollowing(unfollowRequest.profileId)
+                    }
                 }
                 return
             }
