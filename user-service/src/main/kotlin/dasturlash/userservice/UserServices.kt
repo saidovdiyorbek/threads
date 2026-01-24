@@ -110,7 +110,7 @@ class UserServiceImpl(
                     repository.incrementFollowing(followRequest.profileId)
                     return
                 }
-                return
+                throw UserAlreadyFollowedOrSelfFollowException()
             }
         }
         throw UserNotFoundException()

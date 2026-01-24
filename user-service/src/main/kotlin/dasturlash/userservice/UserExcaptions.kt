@@ -75,5 +75,7 @@ class EmailAlreadyExistsException() : UserAppException(){
 }
 class UsernameAlreadyExistsException() : UserAppException(){
     override fun errorType() = ErrorCode.USERNAME_ALREADY_EXISTS
-
+}
+class UserAlreadyFollowedOrSelfFollowException() : UserAppException(){
+    override fun errorType() = ErrorCode.USER_ALREADY_FOLLOWED
 }
