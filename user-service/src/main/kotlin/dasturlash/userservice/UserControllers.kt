@@ -40,3 +40,12 @@ class UserController(
     @GetMapping("/view-profile/{id}")
     fun viewProfile(@PathVariable id: Long): ProfileResponse = service.viewProfile(id)
 }
+
+@RestController
+@RequestMapping("/internal/api/v1/users")
+class UserInternalController(
+    private val service: UserServices
+){
+    @GetMapping("/{id}/exists")
+    fun exists(@PathVariable id: Long): Boolean = service.exists(id)
+}

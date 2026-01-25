@@ -12,6 +12,7 @@ interface UserServices {
     fun follow(followRequest: FollowRequest)
     fun unfollow(unfollowRequest: UnfollowRequest)
     fun viewProfile(id: Long): ProfileResponse
+    fun exists(id: Long): Boolean
 }
 
 @Service
@@ -153,6 +154,15 @@ class UserServiceImpl(
                 followingCount = following,
             )
         }
+        throw UserNotFoundException()
+    }
+
+    override fun exists(id: Long): Boolean {
+        repository.existsUserById(id).takeIf { it }?.let { user ->
+            print("User bor ekan")
+            return true
+        }
+        print("User yoq ekan")
         throw UserNotFoundException()
     }
 }

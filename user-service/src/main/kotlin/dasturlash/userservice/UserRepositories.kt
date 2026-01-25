@@ -78,6 +78,8 @@ interface UserRepository : BaseRepository<User>{
         where u.id = ?1 and u.role = 'ROLE_USER' and u.deleted = false and u.status = 'ACTIVE'
     """)
     fun getUserForProfile(userId: Long): User?
+
+    fun existsUserById(userId: Long): Boolean
 }
 
 interface UserFollowRepository : BaseRepository<UserFollow> {
