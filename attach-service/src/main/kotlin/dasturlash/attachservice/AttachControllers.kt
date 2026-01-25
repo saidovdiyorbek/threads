@@ -1,6 +1,8 @@
 package dasturlash.attachservice
 
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -17,4 +19,13 @@ class AttachController(
     fun upload(@RequestParam("files") files: List<MultipartFile>): List<AttachUrl> =
         service.upload(files)
 
+}
+
+@RestController
+@RequestMapping("/internal/api/v1/attaches")
+class AttachInternalController(
+    private val service: AttachService
+){
+    @GetMapping("/{hash}/exists")
+    fun exists(@PathVariable hash: String): Boolean = service.exists(hash)
 }

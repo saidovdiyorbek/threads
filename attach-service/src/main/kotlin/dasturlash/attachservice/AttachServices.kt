@@ -12,13 +12,14 @@ import java.util.Calendar
 import kotlin.io.path.Path
 
 interface AttachService {
-    fun upload(file: MultipartFile): AttachUrl
+    fun upload(files: List<MultipartFile>): List<AttachUrl>
     fun generatedDataBaseFolder(): String
     fun getExtension(fileName: String?): String
     fun saveAttach(file: MultipartFile, pathFolder: String, hash: String, extension: String): String
     fun createAttach(file: MultipartFile, hash: String, extension: String, pathFolder: String, fullPath: String): Attach
     fun openUrl(hash: String): String
     fun isExists(hash: String): Boolean
+    fun exists(hash: String): Boolean
 }
 
 @Service
@@ -114,5 +115,10 @@ class AttachServiceImpl(
         return repository.existsByHashAndDeletedFalse(hash)
     }
 
-
+    override fun exists(hash: String): Boolean {
+        repository.existsByHashAndDeletedFalse(hash).takeIf { it }?.let {
+            return true
+        }
+        throw AttachNotFoundException()
+    }
 }
