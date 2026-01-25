@@ -71,3 +71,6 @@ sealed class AttachAppException(message: String? = null) : RuntimeException() {
 class FileCreateException() : AttachAppException() {
     override fun errorType() = ErrorCode.FILE_CREATION_FAILED
 }
+class AttachNotFoundException() : AttachAppException() {
+    override fun errorType() = ErrorCode.ATTACH_NOT_FOUND
+}
