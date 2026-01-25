@@ -14,7 +14,7 @@ class AttachController(
 ){
     @PostMapping("/upload",
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun upload(@RequestParam("file") file: MultipartFile): AttachUrl =
-        service.upload(file)
+    fun upload(@RequestParam("files") files: List<MultipartFile>): List<AttachUrl> =
+        service.upload(files)
 
 }
