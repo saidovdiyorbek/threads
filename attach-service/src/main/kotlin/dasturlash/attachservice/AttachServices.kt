@@ -30,14 +30,18 @@ class AttachServiceImpl(
     private val hash: GenerateHash
 ) : AttachService {
     @Transactional
-    override fun upload(file: MultipartFile): AttachUrl {
-        val pathFolder: String = generatedDataBaseFolder()
-        val extension = getExtension(file.originalFilename)
-        val hash: String = hash.generateHash()
-        val fullFilePath = saveAttach(file, pathFolder, hash, extension)
+    override fun upload(files: List<MultipartFile>): List<AttachUrl> {
+        val attachUrls: MutableList<AttachUrl> = mutableListOf()
+        files.forEach { file ->
+            val pathFolder: String = generatedDataBaseFolder()
+            val extension = getExtension(file.originalFilename)
+            val hash: String = hash.generateHash()
+            val fullFilePath = saveAttach(file, pathFolder, hash, extension)
 
-        val attach = createAttach(file, hash, extension, pathFolder, fullFilePath)
-        return AttachUrl(attach.hash, openUrl(attach.hash))
+            val attach = createAttach(file, hash, extension, pathFolder, fullFilePath)
+            attachUrls.add(AttachUrl(attach.hash, openUrl(attach.hash)))
+        }
+        return attachUrls
     }
 
     override fun generatedDataBaseFolder(): String {
