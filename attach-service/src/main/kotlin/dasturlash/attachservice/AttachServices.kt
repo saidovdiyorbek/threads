@@ -22,6 +22,7 @@ interface AttachService {
     fun exists(hash: String): Boolean
     fun listExists(hashes: List<String>): Boolean
     fun deleteList(hashes: List<String>)
+    fun deleteFileFromFolder(folder: String, fileName: String): Boolean
 }
 
 @Service
@@ -134,7 +135,25 @@ class AttachServiceImpl(
     @Transactional
     override fun deleteList(hashes: List<String>) {
         if (hashes.isNotEmpty()) {
+            hashes.forEach { hash ->
+                repository.findAttachByHashAndDeletedTrue(hash)?.let { attach ->
+                    deleteFileFromFolder(attach.path, attach.originName!!)
+                }
+            }
+
             repository.deleteByHashList(hashes)
+
+        }
+    }
+
+    override fun deleteFileFromFolder(folder: String, fileName: String): Boolean{
+        return try {
+            val filePath = Paths.get(folder, fileName)
+
+            Files.deleteIfExists(filePath)
+        }catch (e: Exception){
+            println("Problem delete file ${e.message}")
+            false
         }
     }
 }

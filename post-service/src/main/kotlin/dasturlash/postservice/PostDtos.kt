@@ -24,7 +24,9 @@ data class PostResponse(
     val id: Long,
     val text: String? = null,
     val userId: Long,
-    val postAttaches: List<String>
+    val postAttaches: List<String>,
+    val postLikes: Int,
+    val postComment: Int
 )
 
 data class PostUpdateRequest(

@@ -55,7 +55,9 @@ interface AttachRepository : BaseRepository<Attach>{
 
     @Modifying
     @Query("""
-        delete from Attach a where a.hash in ?1
+        update Attach a set a.deleted = true where a.hash in ?1
     """)
     fun deleteByHashList(hashes: List<String>)
+
+    fun findAttachByHashAndDeletedTrue(hash: String): Attach?
 }

@@ -31,3 +31,12 @@ class PostController(
     fun delete(@PathVariable id: Long)  = service.delete(id)
 
 }
+
+@RestController
+@RequestMapping("/internal/api/v1/posts")
+class PostInternalController(
+    private val service: PostService
+){
+    @GetMapping("/get-user-posts/{userId}")
+    fun getUserPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserPosts(userId)
+}

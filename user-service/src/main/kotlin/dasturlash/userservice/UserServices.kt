@@ -13,12 +13,14 @@ interface UserServices {
     fun unfollow(unfollowRequest: UnfollowRequest)
     fun viewProfile(id: Long): ProfileResponse
     fun exists(id: Long): Boolean
+    fun userPosts(id: Long): List<UserPostResponse>
 }
 
 @Service
 class UserServiceImpl(
     private val repository: UserRepository,
-    private val userFollow: UserFollowRepository
+    private val userFollow: UserFollowRepository,
+    private val postClient: PostClient
 
 ) : UserServices {
     override fun create(request: UserCreateRequest) {
@@ -164,5 +166,32 @@ class UserServiceImpl(
         }
         print("User yoq ekan")
         throw UserNotFoundException()
+    }
+
+    override fun userPosts(id: Long): List<UserPostResponse> {
+        try {
+            repository.findByIdAndDeletedFalse(id)?.let { user ->
+                val userPosts = postClient.getUserPosts(user.id!!)
+                val responseUserPost: MutableList<UserPostResponse> = mutableListOf()
+                if (userPosts.isNotEmpty()){
+                    userPosts.forEach { postResponse ->
+                        responseUserPost.add(UserPostResponse(
+                            user.username,
+                            postResponse.id,
+                            postResponse.text,
+                            postResponse.userId,
+                            postResponse.postAttaches,
+                            postResponse.postLikes,
+                            postResponse.postComment
+                        ))
+                    }
+                    return responseUserPost
+                }
+                return responseUserPost
+            }
+            throw UserNotFoundException()
+        }catch (e: FeignClientException){
+            throw e
+        }
     }
 }

@@ -83,3 +83,22 @@ data class ProfileResponse(
     val followersCount: Int,
     val followingCount: Int,
 )
+
+data class PostResponse(
+    val id: Long,
+    val text: String? = null,
+    val userId: Long,
+    val postAttaches: List<String>,
+    val postLikes: Int,
+    val postComment: Int
+)
+
+data class UserPostResponse(
+    val username: String,
+    val postId: Long,
+    val text: String? = null,
+    val userId: Long,
+    val postAttaches: List<String>,
+    val postLikes: Int,
+    val postComment: Int
+)

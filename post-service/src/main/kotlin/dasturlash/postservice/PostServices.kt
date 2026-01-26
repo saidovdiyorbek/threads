@@ -9,6 +9,7 @@ interface PostService {
     fun getAll(): List<PostResponse>
     fun update(id: Long, request: PostUpdateRequest)
     fun delete(id: Long)
+    fun getUserPosts(userId: Long): List<PostResponse>
 }
 
 @Service
@@ -57,7 +58,9 @@ class PostServicesImpl(
                 id = post!!.id!!,
                 text = post.text,
                 userId = post.userId,
-                postAttachHash
+                postAttachHash,
+                post.postLikeCount,
+                post.postCommentCount
             )
         }
     }
@@ -70,7 +73,9 @@ class PostServicesImpl(
                 id = post!!.id!!,
                 text = post.text,
                 userId = post.userId,
-                postAttachHash
+                postAttachHash,
+                post.postLikeCount,
+                post.postCommentCount
             ))
         }
         return responsePosts
@@ -122,5 +127,20 @@ class PostServicesImpl(
             return
         }
         throw PostNotFoundException()
+    }
+
+    override fun getUserPosts(userId: Long): List<PostResponse> {
+        val responsePosts: MutableList<PostResponse> = mutableListOf()
+        repository.findPostByUserId(userId)?.forEach { post ->
+            responsePosts.add(PostResponse(
+                id = post.id!!,
+                text = post.text,
+                userId = post.userId,
+                postAttachRepo.getPostAttachHash(post.id!!),
+                post.postLikeCount,
+                post.postCommentCount
+            ))
+        }
+        return responsePosts
     }
 }

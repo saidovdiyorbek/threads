@@ -48,7 +48,7 @@ class BaseRepositoryImpl<T : BaseEntity>(
 }
 
 interface PostRepository : BaseRepository<Post>{
-
+    fun findPostByUserId(userId: Long): List<Post>?
 }
 @Repository
 interface PostAttachRepository : BaseRepository<PostAttach>{
