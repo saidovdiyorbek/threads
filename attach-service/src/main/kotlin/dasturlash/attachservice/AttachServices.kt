@@ -20,6 +20,8 @@ interface AttachService {
     fun openUrl(hash: String): String
     fun isExists(hash: String): Boolean
     fun exists(hash: String): Boolean
+    fun listExists(hashes: List<String>): Boolean
+    fun deleteList(hashes: List<String>)
 }
 
 @Service
@@ -120,5 +122,19 @@ class AttachServiceImpl(
             return true
         }
         throw AttachNotFoundException()
+    }
+
+    override fun listExists(hashes: List<String>): Boolean {
+        val existsHashCount = repository.existsHashList(hashes)
+        if (existsHashCount == hashes.size.toLong()) {
+            return true
+        }
+        return false
+    }
+
+    override fun deleteList(hashes: List<String>) {
+        if (hashes.isNotEmpty()) {
+            repository.deleteByHashList(hashes)
+        }
     }
 }

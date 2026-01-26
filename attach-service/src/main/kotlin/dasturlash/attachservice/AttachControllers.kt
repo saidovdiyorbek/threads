@@ -28,4 +28,10 @@ class AttachInternalController(
 ){
     @GetMapping("/{hash}/exists")
     fun exists(@PathVariable hash: String): Boolean = service.exists(hash)
+
+    @PostMapping("/hashes/exists")
+    fun listExists(@RequestBody hashes: List<String>): Boolean = service.listExists(hashes)
+
+    @DeleteMapping("/deleteList")
+    fun deleteList(@RequestBody hashes: List<String>) = service.deleteList(hashes)
 }

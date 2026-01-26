@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.support.JpaEntityInformation
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository
 import org.springframework.data.repository.NoRepositoryBean
@@ -46,4 +48,14 @@ class BaseRepositoryImpl<T : BaseEntity>(
 
 interface AttachRepository : BaseRepository<Attach>{
     fun existsByHashAndDeletedFalse(hash: String): Boolean
+    @Query("""
+        select  count(a) from Attach a where a.hash in ?1
+    """)
+    fun existsHashList(hashes: List<String>): Long
+
+    @Modifying
+    @Query("""
+        delete from Attach a where a.hash in ?1
+    """)
+    fun deleteByHashList(hashes: List<String>)
 }
