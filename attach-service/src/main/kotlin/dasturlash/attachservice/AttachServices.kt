@@ -131,7 +131,7 @@ class AttachServiceImpl(
         }
         return false
     }
-
+    @Transactional
     override fun deleteList(hashes: List<String>) {
         if (hashes.isNotEmpty()) {
             repository.deleteByHashList(hashes)
