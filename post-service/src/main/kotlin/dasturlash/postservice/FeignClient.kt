@@ -1,8 +1,11 @@
 package dasturlash.postservice
 
 import org.springframework.cloud.openfeign.FeignClient
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 
 @FeignClient(name = "user-service", url = "http://localhost:8081/internal/api/v1/users")
 interface UserClient{
@@ -14,4 +17,10 @@ interface UserClient{
 interface AttachClient{
     @GetMapping("/{hash}/exists")
     fun exists(@PathVariable hash: String): Boolean
+
+    @PostMapping("/hashes/exists")
+    fun listExists(@RequestBody hashes: List<String>): Boolean
+
+    @DeleteMapping("/deleteList")
+    fun deleteList(@RequestBody hashes: List<String>)
 }
