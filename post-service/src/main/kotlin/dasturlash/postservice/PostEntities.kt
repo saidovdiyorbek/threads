@@ -39,6 +39,8 @@ class Post(
     @ManyToOne(fetch = FetchType.LAZY)
     var post: Post? = null,
     var userId: Long,
+    val postLikeCount: Int = 0,
+    val postCommentCount: Int = 0,
 ) : BaseEntity()
 
 @Entity
