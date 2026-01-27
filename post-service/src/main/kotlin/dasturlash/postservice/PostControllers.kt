@@ -45,4 +45,7 @@ class PostInternalController(
 ){
     @GetMapping("/get-user-posts/{userId}")
     fun getUserPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserPosts(userId)
+
+    @GetMapping("/get-user-liked-posts/{userId}")
+    fun getUserLikedPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserLikedPosts(userId)
 }

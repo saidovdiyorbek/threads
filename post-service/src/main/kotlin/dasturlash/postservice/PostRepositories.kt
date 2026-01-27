@@ -80,3 +80,8 @@ interface PostAttachRepository : BaseRepository<PostAttach>{
     """)
     fun removeByHashesList(hashes: List<String>)
 }
+
+interface PostLikeRepository : BaseRepository<PostLike>{
+    fun findPostLikeByPostIdAndUserIdAndDeletedTrue(postId: Long, userId: Long): PostLike?
+    fun findPostLikeByPostIdAndUserIdAndDeletedFalse(postId: Long, userId: Long): PostLike?
+}

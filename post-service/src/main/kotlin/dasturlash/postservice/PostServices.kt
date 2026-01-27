@@ -21,6 +21,7 @@ class PostServicesImpl(
    private val postAttachRepo: PostAttachRepository,
    private val userClient: UserClient,
    private val attachClient: AttachClient,
+   private val postLikeRepo: PostLikeRepository,
 ) : PostService{
     @Transactional
     override fun create(request: PostCreateRequest) {
@@ -39,6 +40,7 @@ class PostServicesImpl(
                     //check text
                     request.text?.let { text = it }
                     repository.save(this)
+                    userClient.incrementUserPostCount(request.userId)
                 }
             }
             val postAttaches: MutableList<PostAttach> = mutableListOf()
@@ -124,6 +126,8 @@ class PostServicesImpl(
     override fun delete(id: Long) {
         repository.findByIdAndDeletedFalse(id)?.let { post ->
             val postAttachHash = postAttachRepo.getPostAttachHash(id)
+            repository.trash(post.id!!)
+            userClient.decrementUserPostCount(post.userId)
             if (postAttachHash.isNotEmpty()){
                 attachClient.deleteList(postAttachHash)
             }
@@ -135,6 +139,64 @@ class PostServicesImpl(
     override fun getUserPosts(userId: Long): List<PostResponse> {
         val responsePosts: MutableList<PostResponse> = mutableListOf()
         repository.findPostByUserId(userId)?.forEach { post ->
+            responsePosts.add(PostResponse(
+                id = post.id!!,
+                text = post.text,
+                userId = post.userId,
+                postAttachRepo.getPostAttachHash(post.id!!),
+                post.postLikeCount,
+                post.postCommentCount
+            ))
+        }
+        return responsePosts
+    }
+
+    @Transactional
+    override fun postLike(request: PostLikeRequest) {
+        try{
+            repository.findByIdAndDeletedFalse(request.postId)?.let { post ->
+                userClient.exists(request.userId).takeIf { it }?.let {
+                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedTrue(post.id!!, request.userId)?.let { postLike ->
+                        repository.incrementLike(post.id!!)
+                        postLike.deleted = false
+                        postLikeRepo.save(postLike)
+                        return
+                    }
+                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedFalse(post.id!!, request.userId)?.let {throw UserAlreadyLikedException() }
+
+                    postLikeRepo.save(PostLike(request.userId, post))
+                    repository.incrementLike(post.id!!)
+                    return
+                }
+            }
+            throw PostNotFoundException()
+        }catch (e: FeignClientException){
+            throw e
+        }
+    }
+    @Transactional
+    override fun postDislike(request: PostDislikeRequest) {
+        try {
+            repository.findByIdAndDeletedFalse(request.postId)?.let { post ->
+                userClient.exists(request.userId).takeIf { it }?.let {
+                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedFalse(post.id!!, request.userId)?.let { postLike ->
+                        repository.decrementLike(post.id!!)
+                        postLike.deleted = true
+                        postLikeRepo.save(postLike)
+                        return
+                    }
+                    throw UserAlreadyDislikedException()
+                }
+            }
+            throw PostNotFoundException()
+        }catch (e: FeignClientException){
+            throw e
+        }
+    }
+
+    override fun getUserLikedPosts(userId: Long): List<PostResponse> {
+        val responsePosts: MutableList<PostResponse> = mutableListOf()
+        repository.findUserLikedPosts(userId)?.forEach { post ->
             responsePosts.add(PostResponse(
                 id = post.id!!,
                 text = post.text,

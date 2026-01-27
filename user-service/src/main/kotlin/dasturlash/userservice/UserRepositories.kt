@@ -56,7 +56,7 @@ interface UserRepository : BaseRepository<User>{
     """)
     fun findByIdAndRoleUser(id: Long): User?
 
-    @Modifying // Bu o'zgartirish kiritadi degani
+    @Modifying
     @Query("UPDATE User u SET u.followersCount = u.followersCount + 1 WHERE u.id = :userId")
     fun incrementFollowers(userId: Long)
 
@@ -64,7 +64,10 @@ interface UserRepository : BaseRepository<User>{
     @Query("UPDATE User u SET u.followingCount = u.followingCount + 1 WHERE u.id = :userId")
     fun incrementFollowing(userId: Long)
 
-    // Unfollow uchun teskarisi (decrement)
+    @Modifying
+    @Query("UPDATE User u SET u.postCount = u.postCount + 1 WHERE u.id = :userId")
+    fun incrementUserPost(userId: Long)
+
     @Modifying
     @Query("UPDATE User u SET u.followersCount = u.followersCount - 1 WHERE u.id = :userId")
     fun decrementFollowers(userId: Long)
@@ -72,6 +75,10 @@ interface UserRepository : BaseRepository<User>{
     @Modifying
     @Query("UPDATE User u SET u.followingCount = u.followingCount - 1 WHERE u.id = :userId")
     fun decrementFollowing(userId: Long)
+
+    @Modifying
+    @Query("UPDATE User u SET u.postCount = u.postCount - 1 WHERE u.id = :userId")
+    fun decrementUserPost(userId: Long)
 
     @Query("""
         select u from User u

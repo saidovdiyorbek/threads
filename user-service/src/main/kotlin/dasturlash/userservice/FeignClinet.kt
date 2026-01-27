@@ -8,4 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable
 interface PostClient{
     @GetMapping("/get-user-posts/{userId}")
     fun getUserPosts(@PathVariable userId: Long): List<PostResponse>
+
+    @GetMapping("/get-user-liked-posts/{userId}")
+    fun getUserLikedPosts(@PathVariable userId: Long): List<PostResponse>
 }

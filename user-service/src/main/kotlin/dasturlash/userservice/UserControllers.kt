@@ -42,6 +42,9 @@ class UserController(
 
     @GetMapping("/user-posts/{id}")
     fun userPosts(@PathVariable id: Long): List<UserPostResponse> = service.userPosts(id)
+
+    @GetMapping("/user-liked-posts/{id}")
+    fun userLikedPosts(@PathVariable id: Long): List<PostResponse> = service.userLikedPosts(id)
 }
 
 @RestController
@@ -51,4 +54,11 @@ class UserInternalController(
 ){
     @GetMapping("/{id}/exists")
     fun exists(@PathVariable id: Long): Boolean = service.exists(id)
+
+    @PutMapping("/increment-user-post-count/{id}")
+    fun incrementUserPostCount(@PathVariable id: Long) = service.incrementUserPostCount(id)
+
+    @PutMapping("/decrement-user-post-count/{id}")
+    fun decrementUserPostCount(@PathVariable id: Long) = service.decrementUserPostCount(id)
+
 }

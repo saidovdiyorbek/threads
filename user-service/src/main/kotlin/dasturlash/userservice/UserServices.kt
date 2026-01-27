@@ -197,4 +197,33 @@ class UserServiceImpl(
             throw e
         }
     }
+    @Transactional
+    override fun incrementUserPostCount(id: Long) {
+        repository.findByIdAndDeletedFalse(id)?.let { user ->
+            repository.incrementUserPost(id)
+            return
+        }
+        throw UserNotFoundException()
+    }
+
+    @Transactional
+    override fun decrementUserPostCount(id: Long) {
+        repository.findByIdAndDeletedFalse(id)?.let { user ->
+            repository.decrementUserPost(id)
+            return
+        }
+        throw UserNotFoundException()
+    }
+
+    override fun userLikedPosts(id: Long): List<PostResponse> {
+        repository.findByIdAndDeletedFalse(id)?.let { user ->
+
+            val userLikedPostsResponse: MutableList<PostResponse> = mutableListOf()
+            postClient.getUserLikedPosts(user.id!!).forEach { postResponse ->
+                userLikedPostsResponse.add(postResponse)
+            }
+            return userLikedPostsResponse
+        }
+        throw UserNotFoundException()
+    }
 }
