@@ -113,3 +113,9 @@ sealed class PostAppException(message: String? = null) : RuntimeException() {
 class PostNotFoundException() : PostAppException() {
     override fun errorType() = ErrorCode.POST_NOT_FOUND
 }
+class UserAlreadyLikedException : PostAppException() {
+    override fun errorType() = ErrorCode.USER_ALREADY_LIKED
+}
+class UserAlreadyDislikedException : PostAppException() {
+    override fun errorType() = ErrorCode.USER_ALREADY_DISLIKED
+}

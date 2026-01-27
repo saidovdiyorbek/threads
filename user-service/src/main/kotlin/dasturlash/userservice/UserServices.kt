@@ -14,6 +14,9 @@ interface UserServices {
     fun viewProfile(id: Long): ProfileResponse
     fun exists(id: Long): Boolean
     fun userPosts(id: Long): List<UserPostResponse>
+    fun incrementUserPostCount(id: Long)
+    fun decrementUserPostCount(id: Long)
+    fun userLikedPosts(id: Long): List<PostResponse>
 }
 
 @Service

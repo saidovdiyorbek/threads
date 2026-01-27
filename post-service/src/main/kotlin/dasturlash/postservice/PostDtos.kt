@@ -34,3 +34,13 @@ data class PostUpdateRequest(
     @field:Size(max = 20, message = "Image max 20")
     val hashIds: List<String>? = null,
 )
+
+data class PostLikeRequest(
+    val userId: Long,
+    val postId: Long,
+)
+
+data class PostDislikeRequest(
+    val userId: Long,
+    val postId: Long,
+)

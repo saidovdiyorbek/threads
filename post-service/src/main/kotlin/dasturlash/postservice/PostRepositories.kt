@@ -49,7 +49,21 @@ class BaseRepositoryImpl<T : BaseEntity>(
 
 interface PostRepository : BaseRepository<Post>{
     fun findPostByUserId(userId: Long): List<Post>?
+    @Modifying
+    @Query("UPDATE Post p SET p.postLikeCount = p.postLikeCount + 1 WHERE p.id = :postId")
+    fun incrementLike(postId: Long)
+
+    @Modifying
+    @Query("UPDATE Post p SET p.postLikeCount = p.postLikeCount - 1 WHERE p.id = :postId")
+    fun decrementLike(postId: Long)
+
+    @Query("""
+        select p from Post p
+        where p.id in (select pl.post.id from PostLike pl where pl.userId = :userId )
+    """)
+    fun findUserLikedPosts(userId: Long): List<Post>?
 }
+
 @Repository
 interface PostAttachRepository : BaseRepository<PostAttach>{
 

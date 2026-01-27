@@ -50,3 +50,10 @@ class PostAttach(
     @ManyToOne(fetch = FetchType.LAZY)
     val post: Post,
 ) : BaseEntity()
+
+@Entity
+class PostLike(
+    var userId: Long,
+    @ManyToOne(fetch = FetchType.LAZY)
+    var post: Post,
+) : BaseEntity()

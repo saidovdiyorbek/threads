@@ -30,6 +30,12 @@ class PostController(
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long)  = service.delete(id)
 
+    @PostMapping("/post-like")
+    fun postLike(@RequestBody request: PostLikeRequest) = service.postLike(request)
+
+    @DeleteMapping("/post-dislike")
+    fun postDislike(@RequestBody request: PostDislikeRequest) = service.postDislike(request)
+
 }
 
 @RestController

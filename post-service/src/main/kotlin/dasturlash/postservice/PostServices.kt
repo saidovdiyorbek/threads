@@ -10,6 +10,9 @@ interface PostService {
     fun update(id: Long, request: PostUpdateRequest)
     fun delete(id: Long)
     fun getUserPosts(userId: Long): List<PostResponse>
+    fun postLike(request: PostLikeRequest)
+    fun postDislike(request: PostDislikeRequest)
+    fun getUserLikedPosts(userId: Long): List<PostResponse>
 }
 
 @Service
