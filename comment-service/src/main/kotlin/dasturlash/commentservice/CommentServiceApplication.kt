@@ -2,7 +2,13 @@ package dasturlash.commentservice
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.cloud.openfeign.EnableFeignClients
 
+@EnableFeignClients
+@EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl::class)
+@EnableJpaAuditing
 @SpringBootApplication
 class CommentServiceApplication
 
