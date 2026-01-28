@@ -42,6 +42,13 @@ class Comment(
 ) : BaseEntity()
 
 @Entity
+class CommentAttach(
+    val attachHash: String,
+    @ManyToOne(fetch = FetchType.LAZY)
+    val comment: Comment,
+) : BaseEntity()
+
+@Entity
 class CommentLike(
     @ManyToOne(fetch = FetchType.LAZY)
     val comment: Comment,
