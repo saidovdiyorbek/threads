@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/posts")
 class PostController(
     private val service: PostService
-){
+) {
     @PostMapping
     fun create(@Valid @RequestBody request: PostCreateRequest) = service.create(request)
 
@@ -28,16 +28,14 @@ class PostController(
     fun update(@PathVariable id: Long, @Valid @RequestBody request: PostUpdateRequest) = service.update(id, request)
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long)  = service.delete(id)
+    fun delete(@PathVariable id: Long) = service.delete(id)
 
     @PostMapping("/post-like")
     fun postLike(@RequestBody request: PostLikeRequest) = service.postLike(request)
 
     @DeleteMapping("/post-dislike")
     fun postDislike(@RequestBody request: PostDislikeRequest) = service.postDislike(request)
-
 }
-
 @RestController
 @RequestMapping("/internal/api/v1/posts")
 class PostInternalController(
@@ -48,4 +46,14 @@ class PostInternalController(
 
     @GetMapping("/get-user-liked-posts/{userId}")
     fun getUserLikedPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserLikedPosts(userId)
+
+    @GetMapping("/{id}/exists")
+    fun exists(@PathVariable id: Long): Boolean = service.exists(id)
+
+    @PutMapping("/increment-post-comment-count/{id}")
+    fun incrementPostComment(@PathVariable id: Long) = service.incrementPostComment(id)
+
+    @PutMapping("/decrement-post-comment-count/{id}")
+    fun decrementPostComment(@PathVariable id: Long) = service.decrementPostComment(id)
+
 }

@@ -62,6 +62,16 @@ interface PostRepository : BaseRepository<Post>{
         where p.id in (select pl.post.id from PostLike pl where pl.userId = :userId )
     """)
     fun findUserLikedPosts(userId: Long): List<Post>?
+
+    fun existsPostByIdAndDeletedFalse(id: Long): Boolean
+
+    @Modifying
+    @Query("UPDATE Post p SET p.postCommentCount = p.postCommentCount + 1 WHERE p.id = :postId")
+    fun incrementComment(postId: Long)
+
+    @Modifying
+    @Query("UPDATE Post p SET p.postCommentCount = p.postCommentCount - 1 WHERE p.id = :postId")
+    fun decrementComment(postId: Long)
 }
 
 @Repository

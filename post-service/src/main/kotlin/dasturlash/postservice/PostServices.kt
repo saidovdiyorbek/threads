@@ -13,6 +13,9 @@ interface PostService {
     fun postLike(request: PostLikeRequest)
     fun postDislike(request: PostDislikeRequest)
     fun getUserLikedPosts(userId: Long): List<PostResponse>
+    fun exists(id: Long): Boolean
+    fun incrementPostComment(id: Long)
+    fun decrementPostComment(id: Long)
 }
 
 @Service
@@ -39,8 +42,8 @@ class PostServicesImpl(
 
                     //check text
                     request.text?.let { text = it }
-                    repository.save(this)
-                    userClient.incrementUserPostCount(request.userId)
+
+
                 }
             }
             val postAttaches: MutableList<PostAttach> = mutableListOf()
@@ -49,7 +52,8 @@ class PostServicesImpl(
                     postAttaches.add(PostAttach(hash, post))
                 }
             }
-
+            repository.save(post)
+            userClient.incrementUserPostCount(request.userId)
             postAttachRepo.saveAll(postAttaches)
         }catch (e: FeignClientException){
             throw e
@@ -207,5 +211,30 @@ class PostServicesImpl(
             ))
         }
         return responsePosts
+    }
+
+    override fun exists(id: Long): Boolean {
+        repository.existsPostByIdAndDeletedFalse(id).takeIf { it }?.let {
+            println("Post topildi")
+            return true
+        }
+        println("Post topilmadi")
+        throw PostNotFoundException()
+    }
+    @Transactional
+    override fun incrementPostComment(id: Long) {
+        repository.findByIdAndDeletedFalse(id)?.let { post ->
+            repository.incrementComment(post.id!!)
+            return
+        }
+        throw PostNotFoundException()
+    }
+    @Transactional
+    override fun decrementPostComment(id: Long) {
+        repository.findByIdAndDeletedFalse(id)?.let { post ->
+            repository.decrementComment(post.id!!)
+            return
+        }
+        throw PostNotFoundException()
     }
 }
