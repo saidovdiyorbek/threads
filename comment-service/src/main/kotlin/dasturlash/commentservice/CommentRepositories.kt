@@ -7,10 +7,13 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.support.JpaEntityInformation
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
 interface BaseRepository<T : BaseEntity> : JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
@@ -44,6 +47,26 @@ class BaseRepositoryImpl<T : BaseEntity>(
 
 }
 
-interface CommentRepository : BaseRepository<Comment>{}
+interface CommentRepository : BaseRepository<Comment>{
+    @Modifying
+    @Query("""
+        update Comment c set c.replyCommentCount = c.replyCommentCount + 1 where c.id = :commentId
+    """)
+    fun incrementCommentReplyCount(commentId: Long)
+
+    @Modifying
+    @Query("""
+        update Comment c set c.replyCommentCount = c.replyCommentCount - 1 where c.id = :commentId
+    """)
+    fun decrementCommentReplyCount(commentId: Long)
+}
 
 interface CommentLikeRepository : BaseRepository<CommentLike>{}
+@Repository
+interface CommentAttachRepository : BaseRepository<CommentAttach>{
+    @Query("""
+        select ca.attachHash from CommentAttach ca
+        where ca.comment.id = :commentId
+    """)
+    fun findCommentAttaches(commentId: Long): List<String>
+}
