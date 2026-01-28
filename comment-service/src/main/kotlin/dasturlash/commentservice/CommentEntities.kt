@@ -38,7 +38,8 @@ class Comment(
     var username: String,
     @ManyToOne(fetch = FetchType.LAZY)
     var parentId: Comment? = null,
-    var replyCommentCount: Int = 0
+    var replyCommentCount: Int = 0,
+    var likeCount: Int = 0
 ) : BaseEntity()
 
 @Entity

@@ -48,7 +48,7 @@ class BaseRepositoryImpl<T : BaseEntity>(
 }
 
 interface PostRepository : BaseRepository<Post>{
-    fun findPostByUserId(userId: Long): List<Post>?
+    fun findPostByUserIdAndDeletedFalse(userId: Long): List<Post>?
     @Modifying
     @Query("UPDATE Post p SET p.postLikeCount = p.postLikeCount + 1 WHERE p.id = :postId")
     fun incrementLike(postId: Long)
@@ -61,7 +61,7 @@ interface PostRepository : BaseRepository<Post>{
         select p from Post p
         where p.id in (select pl.post.id from PostLike pl where pl.userId = :userId )
     """)
-    fun findUserLikedPosts(userId: Long): List<Post>?
+    fun findUserLikedPostsAndDeletedFalse(userId: Long): List<Post>?
 
     fun existsPostByIdAndDeletedFalse(id: Long): Boolean
 
@@ -72,6 +72,12 @@ interface PostRepository : BaseRepository<Post>{
     @Modifying
     @Query("UPDATE Post p SET p.postCommentCount = p.postCommentCount - 1 WHERE p.id = :postId")
     fun decrementComment(postId: Long)
+
+    @Modifying
+    @Query("""
+        update Post p set p.deleted = true where p.post.id = :postId
+    """)
+    fun deletePostByPostId(postId: Long)
 }
 
 @Repository

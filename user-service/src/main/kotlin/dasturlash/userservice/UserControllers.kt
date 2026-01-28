@@ -40,11 +40,6 @@ class UserController(
     @GetMapping("/view-profile/{id}")
     fun viewProfile(@PathVariable id: Long): ProfileResponse = service.viewProfile(id)
 
-    @GetMapping("/user-posts/{id}")
-    fun userPosts(@PathVariable id: Long): List<UserPostResponse> = service.userPosts(id)
-
-    @GetMapping("/user-liked-posts/{id}")
-    fun userLikedPosts(@PathVariable id: Long): List<PostResponse> = service.userLikedPosts(id)
 }
 
 @RestController

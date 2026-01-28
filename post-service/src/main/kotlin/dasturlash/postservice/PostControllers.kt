@@ -35,17 +35,18 @@ class PostController(
 
     @DeleteMapping("/post-dislike")
     fun postDislike(@RequestBody request: PostDislikeRequest) = service.postDislike(request)
+
+    @GetMapping("/get-user-posts/{userId}")
+    fun getUserPosts(@PathVariable userId: Long): UserPostsResponse = service.getUserPosts(userId)
+
+    @GetMapping("/get-user-liked-posts/{userId}")
+    fun getUserLikedPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserLikedPosts(userId)
 }
 @RestController
 @RequestMapping("/internal/api/v1/posts")
 class PostInternalController(
     private val service: PostService
 ){
-    @GetMapping("/get-user-posts/{userId}")
-    fun getUserPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserPosts(userId)
-
-    @GetMapping("/get-user-liked-posts/{userId}")
-    fun getUserLikedPosts(@PathVariable userId: Long): List<PostResponse> = service.getUserLikedPosts(userId)
 
     @GetMapping("/{id}/exists")
     fun exists(@PathVariable id: Long): Boolean = service.exists(id)
@@ -55,5 +56,8 @@ class PostInternalController(
 
     @PutMapping("/decrement-post-comment-count/{id}")
     fun decrementPostComment(@PathVariable id: Long) = service.decrementPostComment(id)
+
+    @DeleteMapping("/delete-comments-by-deleted-post/{postId}")
+    fun deleteCommentsByPost(@PathVariable postId: Long) = service.deleteCommentsByPost(postId)
 
 }

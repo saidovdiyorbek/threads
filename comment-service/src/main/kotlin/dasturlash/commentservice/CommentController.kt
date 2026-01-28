@@ -29,4 +29,19 @@ class CommentController(
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long)  = service.delete(id)
+
+    @GetMapping("/get-comments-by-userId/{userId}")
+    fun getCommentsByUserId(@PathVariable userId: Long): UserCommentsResponse = service.getCommentsByUserId(userId)
+
+    @GetMapping("/get-comments-by-postId/{postId}")
+    fun getCommentsByPostId(@PathVariable postId: Long): PostCommentsResponse = service.getCommentsByPostId(postId)
+
+    @GetMapping("/get-comments-by-parent/{parentId}")
+    fun getCommentsByParent(@PathVariable parentId: Long): ParentCommentsResponse = service.getCommentsByParent(parentId)
+
+    @PostMapping("/like-comment")
+    fun likeComment(@RequestBody likeBody: LikeRequest) = service.likeComment(likeBody)
+
+    @DeleteMapping("/dislike-comment")
+    fun dislikeComment(@RequestBody dislikeBody: LikeRequest) = service.dislikeComment(dislikeBody)
 }

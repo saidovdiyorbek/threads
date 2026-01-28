@@ -9,12 +9,18 @@ interface CommentService{
     fun update(id: Long, request: CommentUpdateRequest)
     fun getAll(): List<CommentResponse>
     fun delete(id: Long)
+    fun getCommentsByUserId(userId: Long): UserCommentsResponse
+    fun getCommentsByPostId(postId: Long): PostCommentsResponse
+    fun getCommentsByParent(parentId: Long): ParentCommentsResponse
+    fun likeComment(request: LikeRequest)
+    fun dislikeComment(request: LikeRequest)
 }
 
 @Service
 class CommentServiceImpl(
     private val repository: CommentRepository,
     private val commentAttachRepo: CommentAttachRepository,
+    private val commentLikeRepo: CommentLikeRepository,
 
     private val userClient: UserClient,
     private val postClient: PostClient,
@@ -42,7 +48,9 @@ class CommentServiceImpl(
                         }
                     }
                     postClient.incrementPostComment(saveComment.postId)
-                    repository.incrementCommentReplyCount(parentComment?.id!!)
+                    parentComment?.let {
+                        repository.incrementCommentReplyCount(parentComment.id!!)
+                    }
                     commentAttachRepo.saveAll(commentAttaches)
                     return
                 }
@@ -61,6 +69,7 @@ class CommentServiceImpl(
                 UserShortInfo(comment.userId, comment.username),
                 comment.postId,
                 comment.parentId?.id,
+                comment.likeCount,
                 comment.deleted,
             )
         }
@@ -81,6 +90,7 @@ class CommentServiceImpl(
                 UserShortInfo(comment.userId, comment.username),
                 comment.postId,
                 comment.parentId?.id,
+                comment.likeCount,
                 comment.deleted,
             ))
         }
@@ -91,6 +101,7 @@ class CommentServiceImpl(
         repository.findByIdAndDeletedFalse(id)?.let { comment ->
             val commentAttaches = commentAttachRepo.findCommentAttaches(comment.id!!)
             repository.trash(comment.id!!)
+            repository.deleteCommentByParentId(id)
             //parent commentni reply countini kamaytirish
             comment.parentId?.let { parentId ->
                 repository.decrementCommentReplyCount(parentId.id!!)
@@ -104,5 +115,119 @@ class CommentServiceImpl(
             return
         }
         throw CommentNotFoundException()
+    }
+
+    override fun getCommentsByUserId(userId: Long): UserCommentsResponse {
+        try{
+            val shortInfo = userClient.getUserShortInfo(userId)?.let { userShortInfo ->
+                val responseCommentShortInfo: MutableList<CommentShortInfo> = mutableListOf()
+                repository.findCommentsByUserId(userId).forEach { comment ->
+                    responseCommentShortInfo.add(
+                        CommentShortInfo(
+                            comment.text,
+                            comment.id!!,
+                            comment.parentId,
+                            comment.replyCommentCount,
+                            comment.likeCount,
+                        )
+                    )
+                }
+                return UserCommentsResponse(
+                    userShortInfo,
+                    responseCommentShortInfo
+                )
+            }
+        }catch (e: FeignClientException){
+            throw e
+        }
+        return UserCommentsResponse()
+    }
+    @Transactional
+    override fun getCommentsByPostId(postId: Long): PostCommentsResponse {
+        try{
+            postClient.exists(postId).takeIf { it }?.let {
+                val responseCommentShortInfo: MutableList<CommentShortInfo> = mutableListOf()
+                repository.findCommentsByPostId(postId).forEach { comment ->
+                    responseCommentShortInfo.add(
+                        CommentShortInfo(
+                            comment.text,
+                            comment.id!!,
+                            comment.parentId,
+                            comment.replyCommentCount,
+                            comment.likeCount,
+                        )
+                    )
+                }
+                return PostCommentsResponse(
+                    postId,
+                    responseCommentShortInfo
+                )
+            }
+        }catch (e: FeignClientException){
+            throw e
+        }
+          return PostCommentsResponse()
+    }
+
+    override fun getCommentsByParent(parentId: Long): ParentCommentsResponse {
+        repository.findByIdAndDeletedFalse(parentId)?.let { pComment ->
+            val responseCommentShortInfo: MutableList<ParentCommentShortInfo> = mutableListOf()
+            repository.findCommentsByParentId(parentId).forEach { comment ->
+                responseCommentShortInfo.add(ParentCommentShortInfo(
+                    comment.text,
+                    comment.id!!,
+                    comment.replyCommentCount,
+                    comment.likeCount,
+                ))
+            }
+            return ParentCommentsResponse(
+                pComment.id,
+                pComment.text,
+                responseCommentShortInfo
+            )
+        }
+        throw CommentNotFoundException()
+    }
+    @Transactional
+    override fun likeComment(request: LikeRequest) {
+        try {
+            userClient.exists(request.userId).takeIf { it }?.let {
+                repository.findByIdAndDeletedFalse(request.commentId)?.let { comment ->
+                    commentLikeRepo.findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(comment.id!!, request.userId)?.let {
+                        if (it.deleted){
+                            it.deleted = false
+                            commentLikeRepo.save(it)
+                            repository.incrementCommentLike(request.commentId)
+                            return
+                        }
+                    }
+                    commentLikeRepo.save(CommentLike(comment, request.userId))
+                    repository.incrementCommentLike(comment.id!!)
+                }
+            }
+        }catch (e: FeignClientException){
+            throw e
+        }
+    }
+
+    @Transactional
+    override fun dislikeComment(request: LikeRequest) {
+        try {
+            userClient.exists(request.userId).takeIf { it }?.let {
+                repository.findByIdAndDeletedFalse(request.commentId)?.let { comment ->
+                    commentLikeRepo.findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(comment.id!!, request.userId)?.let {
+                        if (!it.deleted){
+                            it.deleted = true
+                            commentLikeRepo.save(it)
+                            repository.decrementCommentLike(request.commentId)
+                            return
+                        }
+                    }
+                    repository.decrementCommentReplyCount(comment.id!!)
+                }
+            }
+        }catch (e: FeignClientException){
+            throw e
+        }
     }
 }

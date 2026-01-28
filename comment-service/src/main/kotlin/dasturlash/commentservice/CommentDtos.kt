@@ -9,7 +9,9 @@ data class BaseMessage(val code: Int?, val message: String? = null){
 }
 
 data class CommentCreateRequest(
+    @field:Size(max = 200, message = "Text max 200")
     val text: String? = null,
+    @field:Size(max = 20, message = "Image max 20")
     val hashes: List<String>? = null,
     val userId: Long,
     val postId: Long,
@@ -18,13 +20,12 @@ data class CommentCreateRequest(
 
 data class CommentResponse(
     val id: Long,
-    @field:Size(max = 200, message = "Text max 200")
     val text: String? = null,
-    @field:Size(max = 20, message = "Image max 20")
     val hashes: List<String>? = null,
     val userShortInfo: UserShortInfo? = null,
     val postId: Long? = null,
     val parentId: Long? = null,
+    var likeCount: Int = 0,
     val deleted: Boolean,
 )
 
@@ -35,4 +36,40 @@ data class CommentUpdateRequest(
 data class UserShortInfo(
     val id: Long,
     val username: String,
+)
+
+data class CommentShortInfo(
+    val text: String? = null,
+    val id: Long,
+    val parent: Comment? = null,
+    val replyCommentCount: Int = 0,
+    val likeCount: Int = 0,
+)
+
+data class ParentCommentShortInfo(
+    val text: String? = null,
+    val postId: Long,
+    val replyCommentCount: Int = 0,
+    val likeCount: Int = 0,
+)
+
+data class UserCommentsResponse(
+    val user: UserShortInfo? = null,
+    val comments: List<CommentShortInfo>? = null
+)
+
+data class PostCommentsResponse(
+    val postId: Long? = null,
+    val comments: List<CommentShortInfo>? = null
+)
+
+data class ParentCommentsResponse(
+    val parentId: Long? = null,
+    val parentText: String? = null,
+    val comments: List<ParentCommentShortInfo>? = null
+)
+
+data class LikeRequest(
+    val userId: Long,
+    val commentId: Long,
 )

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 
-@FeignClient(name = "user-service", url = "http://localhost:8081/internal/api/v1/users")
+@FeignClient(name = "user-service", url = "\${services.hosts.user}/internal/api/v1/users")
 interface UserClient{
     @GetMapping("/{id}/exists")
     fun exists(@PathVariable id: Long): Boolean
@@ -18,9 +18,12 @@ interface UserClient{
 
     @PutMapping("/decrement-user-post-count/{id}")
     fun decrementUserPostCount(@PathVariable id: Long)
+
+    @GetMapping("/{id}/get-user-short-info")
+    fun getUserShortInfo(@PathVariable id: Long): UserShortInfo?
 }
 
-@FeignClient(name = "attach-service", url = "http://localhost:8083/internal/api/v1/attaches")
+@FeignClient(name = "attach-service", url = "\${services.hosts.attach}/internal/api/v1/attaches")
 interface AttachClient{
     @GetMapping("/{hash}/exists")
     fun exists(@PathVariable hash: String): Boolean

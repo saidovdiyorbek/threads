@@ -13,10 +13,8 @@ interface UserServices {
     fun unfollow(unfollowRequest: UnfollowRequest)
     fun viewProfile(id: Long): ProfileResponse
     fun exists(id: Long): Boolean
-    fun userPosts(id: Long): List<UserPostResponse>
     fun incrementUserPostCount(id: Long)
     fun decrementUserPostCount(id: Long)
-    fun userLikedPosts(id: Long): List<PostResponse>
     fun getUserShortInfo(id: Long): UserShortInfo?
 }
 
@@ -24,7 +22,6 @@ interface UserServices {
 class UserServiceImpl(
     private val repository: UserRepository,
     private val userFollow: UserFollowRepository,
-    private val postClient: PostClient
 
 ) : UserServices {
     override fun create(request: UserCreateRequest) {
@@ -172,32 +169,6 @@ class UserServiceImpl(
         throw UserNotFoundException()
     }
 
-    override fun userPosts(id: Long): List<UserPostResponse> {
-        try {
-            repository.findByIdAndDeletedFalse(id)?.let { user ->
-                val userPosts = postClient.getUserPosts(user.id!!)
-                val responseUserPost: MutableList<UserPostResponse> = mutableListOf()
-                if (userPosts.isNotEmpty()){
-                    userPosts.forEach { postResponse ->
-                        responseUserPost.add(UserPostResponse(
-                            user.username,
-                            postResponse.id,
-                            postResponse.text,
-                            postResponse.userId,
-                            postResponse.postAttaches,
-                            postResponse.postLikes,
-                            postResponse.postComment
-                        ))
-                    }
-                    return responseUserPost
-                }
-                return responseUserPost
-            }
-            throw UserNotFoundException()
-        }catch (e: FeignClientException){
-            throw e
-        }
-    }
     @Transactional
     override fun incrementUserPostCount(id: Long) {
         repository.findByIdAndDeletedFalse(id)?.let { user ->
@@ -212,18 +183,6 @@ class UserServiceImpl(
         repository.findByIdAndDeletedFalse(id)?.let { user ->
             repository.decrementUserPost(id)
             return
-        }
-        throw UserNotFoundException()
-    }
-
-    override fun userLikedPosts(id: Long): List<PostResponse> {
-        repository.findByIdAndDeletedFalse(id)?.let { user ->
-
-            val userLikedPostsResponse: MutableList<PostResponse> = mutableListOf()
-            postClient.getUserLikedPosts(user.id!!).forEach { postResponse ->
-                userLikedPostsResponse.add(postResponse)
-            }
-            return userLikedPostsResponse
         }
         throw UserNotFoundException()
     }

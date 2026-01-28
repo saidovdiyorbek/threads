@@ -9,13 +9,14 @@ interface PostService {
     fun getAll(): List<PostResponse>
     fun update(id: Long, request: PostUpdateRequest)
     fun delete(id: Long)
-    fun getUserPosts(userId: Long): List<PostResponse>
+    fun getUserPosts(userId: Long): UserPostsResponse
     fun postLike(request: PostLikeRequest)
     fun postDislike(request: PostDislikeRequest)
     fun getUserLikedPosts(userId: Long): List<PostResponse>
     fun exists(id: Long): Boolean
     fun incrementPostComment(id: Long)
     fun decrementPostComment(id: Long)
+    fun deleteCommentsByPost(postId: Long)
 }
 
 @Service
@@ -140,19 +141,28 @@ class PostServicesImpl(
         throw PostNotFoundException()
     }
 
-    override fun getUserPosts(userId: Long): List<PostResponse> {
-        val responsePosts: MutableList<PostResponse> = mutableListOf()
-        repository.findPostByUserId(userId)?.forEach { post ->
-            responsePosts.add(PostResponse(
-                id = post.id!!,
-                text = post.text,
-                userId = post.userId,
-                postAttachRepo.getPostAttachHash(post.id!!),
-                post.postLikeCount,
-                post.postCommentCount
-            ))
+    override fun getUserPosts(userId: Long): UserPostsResponse {
+        try{
+            userClient.getUserShortInfo(userId)?.let { shortInfo ->
+                val responseUserPosts: MutableList<PostShortResponse> = mutableListOf()
+                repository.findPostByUserIdAndDeletedFalse(shortInfo.id)?.forEach { post ->
+                    responseUserPosts.add(PostShortResponse(
+                        id = post.id!!,
+                        text = post.text,
+                        postAttachRepo.getPostAttachHash(post.id!!),
+                        post.postLikeCount,
+                        post.postCommentCount
+                    ))
+                }
+                return UserPostsResponse(
+                    shortInfo,
+                    responseUserPosts
+                )
+            }
+        }catch (e: FeignClientException){
+            throw e
         }
-        return responsePosts
+        return UserPostsResponse()
     }
 
     @Transactional
@@ -200,7 +210,7 @@ class PostServicesImpl(
 
     override fun getUserLikedPosts(userId: Long): List<PostResponse> {
         val responsePosts: MutableList<PostResponse> = mutableListOf()
-        repository.findUserLikedPosts(userId)?.forEach { post ->
+        repository.findUserLikedPostsAndDeletedFalse(userId)?.forEach { post ->
             responsePosts.add(PostResponse(
                 id = post.id!!,
                 text = post.text,
@@ -236,5 +246,9 @@ class PostServicesImpl(
             return
         }
         throw PostNotFoundException()
+    }
+
+    override fun deleteCommentsByPost(postId: Long) {
+
     }
 }

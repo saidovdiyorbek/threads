@@ -1,12 +1,14 @@
 package dasturlash.commentservice
 
 import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.support.JpaEntityInformation
@@ -59,9 +61,49 @@ interface CommentRepository : BaseRepository<Comment>{
         update Comment c set c.replyCommentCount = c.replyCommentCount - 1 where c.id = :commentId
     """)
     fun decrementCommentReplyCount(commentId: Long)
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    fun findCommentsByUserId(userId: Long): List<Comment>
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    fun findCommentsByPostId(postId: Long): List<Comment>
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Query("""
+        select c from Comment c
+        where c.parentId.id = :parentId
+    """)
+    fun findCommentsByParentId(parentId: Long): List<Comment>
+
+    @Modifying
+    @Query("""
+        update Comment c set c.likeCount = c.likeCount + 1 where c.id = :commentId
+    """)
+    fun incrementCommentLike(commentId: Long)
+
+    @Modifying
+    @Query("""
+        update Comment c set c.likeCount = c.likeCount - 1 where c.id = :commentId
+    """)
+    fun decrementCommentLike(commentId: Long)
+
+    @Modifying
+    @Query("""
+        update Comment c set c.deleted = true where c.parentId.id = :parentId
+    """)
+    fun deleteCommentByParentId(parentId: Long)
+
+    @Modifying
+    @Query("""
+        update Comment c set c.deleted = true where c.postId = :postId
+    """)
+    fun deleteCommentsByPostId(postId: Long)
 }
 
-interface CommentLikeRepository : BaseRepository<CommentLike>{}
+interface CommentLikeRepository : BaseRepository<CommentLike>{
+    fun findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(commentId: Long, userId: Long): CommentLike?
+    fun existsCommentLikeByCommentIdAndUserIdAndDeletedFalse(commentId: Long, userId: Long): Boolean
+}
 @Repository
 interface CommentAttachRepository : BaseRepository<CommentAttach>{
     @Query("""

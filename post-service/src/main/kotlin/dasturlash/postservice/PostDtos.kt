@@ -44,3 +44,21 @@ data class PostDislikeRequest(
     val userId: Long,
     val postId: Long,
 )
+
+data class UserShortInfo(
+    val id: Long,
+    val username: String,
+)
+
+data class PostShortResponse(
+    val id: Long,
+    val text: String? = null,
+    val postAttaches: List<String>,
+    val postLikes: Int,
+    val postComment: Int
+)
+
+data class UserPostsResponse(
+    val user: UserShortInfo? = null,
+    val posts: List<PostShortResponse>? = null
+)
