@@ -60,12 +60,12 @@ class CustomErrorDecoder(
 }
 
 @RestControllerAdvice
-class PaymentExceptionHandler(
+class CommentExceptionHandler(
     private val messageSource: MessageSource
 ) {
 
-    @ExceptionHandler(PostAppException::class)
-    fun handlePaymentAppException(ex: PostAppException): ResponseEntity<BaseMessage> {
+    @ExceptionHandler(CommentAppException::class)
+    fun handlePaymentAppException(ex: CommentAppException): ResponseEntity<BaseMessage> {
         val locale = LocaleContextHolder.getLocale()
         val message = try {
             messageSource.getMessage(ex.errorType().toString(), null, locale)
@@ -96,7 +96,7 @@ class FeignClientException(
     }
 }
 
-sealed class PostAppException(message: String? = null) : RuntimeException() {
+sealed class CommentAppException(message: String? = null) : RuntimeException() {
     abstract fun errorType(): ErrorCode
     protected open fun getErrorMessageArguments(): Array<Any?>? = null
     fun gerErrorMessage(errorMessageSource: ResourceBundleMessageSource): BaseMessage {
@@ -109,5 +109,9 @@ sealed class PostAppException(message: String? = null) : RuntimeException() {
             )
         )
     }
+}
+
+class CommentNotFoundException() : CommentAppException() {
+    override fun errorType() = ErrorCode.COMMENT_NOT_FOUND
 }
 
