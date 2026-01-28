@@ -33,9 +33,9 @@ class BaseEntity(
 @Entity
 class Comment(
     var text: String? = null,
-    var hash: String? = null,
-    var postId: String,
-    var userId: String,
+    var postId: Long,
+    var userId: Long,
+    var username: String,
     @ManyToOne(fetch = FetchType.LAZY)
     var parentId: Comment? = null,
 ) : BaseEntity()
