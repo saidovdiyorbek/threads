@@ -17,6 +17,7 @@ interface UserServices {
     fun incrementUserPostCount(id: Long)
     fun decrementUserPostCount(id: Long)
     fun userLikedPosts(id: Long): List<PostResponse>
+    fun getUserShortInfo(id: Long): UserShortInfo?
 }
 
 @Service
@@ -223,6 +224,16 @@ class UserServiceImpl(
                 userLikedPostsResponse.add(postResponse)
             }
             return userLikedPostsResponse
+        }
+        throw UserNotFoundException()
+    }
+
+    override fun getUserShortInfo(id: Long): UserShortInfo? {
+        repository.findByIdAndDeletedFalse(id)?.let { user ->
+            return UserShortInfo(
+                id = user.id!!,
+                username = user.username,
+            )
         }
         throw UserNotFoundException()
     }

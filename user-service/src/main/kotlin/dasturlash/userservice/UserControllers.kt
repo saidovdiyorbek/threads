@@ -61,4 +61,8 @@ class UserInternalController(
     @PutMapping("/decrement-user-post-count/{id}")
     fun decrementUserPostCount(@PathVariable id: Long) = service.decrementUserPostCount(id)
 
+    @GetMapping("/{id}/get-user-short-info")
+    fun getUserShortInfo(@PathVariable id: Long): UserShortInfo? = service.getUserShortInfo(id)
+
+
 }

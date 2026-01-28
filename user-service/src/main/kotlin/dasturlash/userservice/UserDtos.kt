@@ -102,3 +102,8 @@ data class UserPostResponse(
     val postLikes: Int,
     val postComment: Int
 )
+
+data class UserShortInfo(
+    val id: Long,
+    val username: String,
+)
