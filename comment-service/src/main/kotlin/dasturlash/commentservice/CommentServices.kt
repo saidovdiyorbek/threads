@@ -66,3 +66,43 @@ class CommentServiceImpl(
         }
         throw CommentNotFoundException()
     }
+
+    override fun update(id: Long, request: CommentUpdateRequest) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAll(): List<CommentResponse> {
+        val responseComments: MutableList<CommentResponse> = mutableListOf()
+        repository.findAll().forEach { comment ->
+            responseComments.add(CommentResponse(
+                comment.id!!,
+                comment.text,
+                commentAttachRepo.findCommentAttaches(comment.id!!),
+                UserShortInfo(comment.userId, comment.username),
+                comment.postId,
+                comment.parentId?.id,
+                comment.deleted,
+            ))
+        }
+        return responseComments
+    }
+
+    override fun delete(id: Long) {
+        repository.findByIdAndDeletedFalse(id)?.let { comment ->
+            val commentAttaches = commentAttachRepo.findCommentAttaches(comment.id!!)
+            repository.trash(comment.id!!)
+            //parent commentni reply countini kamaytirish
+            comment.parentId?.let { parentId ->
+                repository.decrementCommentReplyCount(parentId.id!!)
+            }
+            //postni comment countini kamaytirish
+            postClient.decrementPostComment(comment.postId)
+            //attachlarni ochirish
+            if (commentAttaches.isNotEmpty()) {
+                attachClient.deleteList(commentAttaches)
+            }
+            return
+        }
+        throw CommentNotFoundException()
+    }
+}
