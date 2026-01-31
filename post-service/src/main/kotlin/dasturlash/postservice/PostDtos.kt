@@ -62,3 +62,10 @@ data class UserPostsResponse(
     val user: UserShortInfo? = null,
     val posts: List<PostShortResponse>? = null
 )
+
+data class UserInfoResponse(
+    val id: Long,
+    val fullName: String,
+    val username: String,
+    val role: String,
+)
