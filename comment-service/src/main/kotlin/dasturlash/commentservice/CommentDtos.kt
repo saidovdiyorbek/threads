@@ -73,3 +73,10 @@ data class LikeRequest(
     val userId: Long,
     val commentId: Long,
 )
+
+data class UserInfoResponse(
+    val id: Long,
+    val fullName: String,
+    val username: String,
+    val role: String,
+)
