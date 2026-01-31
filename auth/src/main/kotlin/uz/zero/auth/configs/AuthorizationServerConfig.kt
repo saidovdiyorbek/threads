@@ -80,6 +80,7 @@ class AuthorizationServerConfig {
                     .requestMatchers("/user/**").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
                     .requestMatchers("/internal/**").permitAll()
+                    .requestMatchers("/error").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2ResourceServer { resourceServer ->
