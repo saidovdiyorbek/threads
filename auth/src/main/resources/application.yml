@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: auth
+  config:
+    import: "configserver:http://user:nimadirxavfsizlik@localhost:8888/"
+  profiles:
+    active: local
+logging:
+  level:
+    org.springframework.security: TRACE
+    org.springframework.security.oauth2: TRACE
+    org.springframework.web: DEBUG
