@@ -21,6 +21,7 @@ class CommentServiceImpl(
     private val repository: CommentRepository,
     private val commentAttachRepo: CommentAttachRepository,
     private val commentLikeRepo: CommentLikeRepository,
+    private val securityUtil: SecurityUtil,
 
     private val userClient: UserClient,
     private val postClient: PostClient,
@@ -29,21 +30,22 @@ class CommentServiceImpl(
     @Transactional
     override fun create(request: CommentCreateRequest) {
         try{
+            val currentUserId = securityUtil.getCurrentUserId()
             postClient.exists(request.postId).takeIf {it}?.let {
-                userClient.getUserShortInfo(request.userId)?.let { userShortInfo ->
+                userClient.getUserShortInfo(currentUserId)?.let { userShortInfo ->
                     val parentComment = request.parentId?.let { parentId ->
                         repository.findByIdAndDeletedFalse(parentId) ?: throw CommentNotFoundException()
                     }
                     val saveComment = repository.save(Comment(
                         request.text,
                         request.postId,
-                        request.userId,
+                        currentUserId,
                         userShortInfo.username,
                         parentComment
                     ))
                     val commentAttaches: MutableList<CommentAttach> = mutableListOf()
                     request.hashes?.forEach { hash ->
-                        attachClient.exists(hash).takeIf {it}?.let {
+                        attachClient.exists(InternalHashCheckRequest(currentUserId, hash)).takeIf {it}?.let {
                             commentAttaches.add(CommentAttach(hash, saveComment))
                         }
                     }
@@ -97,8 +99,13 @@ class CommentServiceImpl(
         return responseComments
     }
 
+    @Transactional
     override fun delete(id: Long) {
+        val currentUserId = securityUtil.getCurrentUserId()
         repository.findByIdAndDeletedFalse(id)?.let { comment ->
+            if (currentUserId != comment.userId) {
+                throw CommentNotYoursException()
+            }
             val commentAttaches = commentAttachRepo.findCommentAttaches(comment.id!!)
             repository.trash(comment.id!!)
             repository.deleteCommentByParentId(id)
@@ -119,7 +126,12 @@ class CommentServiceImpl(
 
     override fun getCommentsByUserId(userId: Long): UserCommentsResponse {
         try{
-            val shortInfo = userClient.getUserShortInfo(userId)?.let { userShortInfo ->
+            val currentUserRole = securityUtil.getCurrentUserRole()
+            var user = userId
+            if (currentUserRole != UserRole.ADMIN || currentUserRole != UserRole.DEVELOPER) {
+                user = securityUtil.getCurrentUserId()
+            }
+            val shortInfo = userClient.getUserShortInfo(user)?.let { userShortInfo ->
                 val responseCommentShortInfo: MutableList<CommentShortInfo> = mutableListOf()
                 repository.findCommentsByUserId(userId).forEach { comment ->
                     responseCommentShortInfo.add(
@@ -191,19 +203,23 @@ class CommentServiceImpl(
     @Transactional
     override fun likeComment(request: LikeRequest) {
         try {
-            userClient.exists(request.userId).takeIf { it }?.let {
+            val currentUserId = securityUtil.getCurrentUserId()
+            userClient.exists(currentUserId).takeIf { it }?.let {
                 repository.findByIdAndDeletedFalse(request.commentId)?.let { comment ->
-                    commentLikeRepo.findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(comment.id!!, request.userId)?.let {
+                    commentLikeRepo.findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(comment.id!!, currentUserId)?.let {
                         if (it.deleted){
                             it.deleted = false
                             commentLikeRepo.save(it)
                             repository.incrementCommentLike(request.commentId)
                             return
                         }
+                        throw AlreadyLikedCommentException()
                     }
-                    commentLikeRepo.save(CommentLike(comment, request.userId))
+                    commentLikeRepo.save(CommentLike(comment, currentUserId))
                     repository.incrementCommentLike(comment.id!!)
+                    return
                 }
+                throw CommentNotFoundException()
             }
         }catch (e: FeignClientException){
             throw e
@@ -213,18 +229,22 @@ class CommentServiceImpl(
     @Transactional
     override fun dislikeComment(request: LikeRequest) {
         try {
-            userClient.exists(request.userId).takeIf { it }?.let {
+            val currentUserId = securityUtil.getCurrentUserId()
+            userClient.exists(currentUserId).takeIf { it }?.let {
                 repository.findByIdAndDeletedFalse(request.commentId)?.let { comment ->
-                    commentLikeRepo.findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(comment.id!!, request.userId)?.let {
+                    commentLikeRepo.findCommentLikeByCommentIdAndUserIdAndDeletedFalseOrDeletedTrue(comment.id!!, currentUserId)?.let {
                         if (!it.deleted){
                             it.deleted = true
                             commentLikeRepo.save(it)
                             repository.decrementCommentLike(request.commentId)
                             return
                         }
+                        throw  AlreadyUnlikedCommentException()
                     }
                     repository.decrementCommentReplyCount(comment.id!!)
+                    return
                 }
+                throw CommentNotFoundException()
             }
         }catch (e: FeignClientException){
             throw e

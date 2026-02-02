@@ -36,7 +36,7 @@ class BaseEntity(
 @Entity
 @Table(name = "users")
 class User(
-    var fullname: String? = null,
+    var fullName: String? = null,
     @Column(nullable = false, unique = true) var username: String,
     @Column(nullable = false, unique = true) var email: String,
     @Column(nullable = false)var password: String,

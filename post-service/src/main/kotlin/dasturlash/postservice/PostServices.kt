@@ -26,14 +26,16 @@ class PostServicesImpl(
    private val userClient: UserClient,
    private val attachClient: AttachClient,
    private val postLikeRepo: PostLikeRepository,
+   private val securityUtil: SecurityUtil
 ) : PostService{
     @Transactional
     override fun create(request: PostCreateRequest) {
         try {
-
             val post = Post(userId = 0).apply {
-                userClient.exists(request.userId).takeIf { it }?.let {
-                    userId = request.userId
+                val currentUserId = securityUtil.getCurrentUserId()
+                println("In session user: $currentUserId")
+                userClient.exists(currentUserId).takeIf { it }?.let {
+                    userId = currentUserId
                     //check parent post
                     request.parentId?.let {
                         val findPost = repository.findByIdAndDeletedFalse(it) ?:
@@ -49,12 +51,13 @@ class PostServicesImpl(
             }
             val postAttaches: MutableList<PostAttach> = mutableListOf()
             request.hashIds?.forEach { hash ->
-                attachClient.exists(hash).takeIf { it }?.let {
+                println("Create postda 54")
+                attachClient.exists(InternalHashCheckRequest(securityUtil.getCurrentUserId(), hash)).takeIf { it }?.let {
                     postAttaches.add(PostAttach(hash, post))
                 }
             }
             repository.save(post)
-            userClient.incrementUserPostCount(request.userId)
+            userClient.incrementUserPostCount(securityUtil.getCurrentUserId())
             postAttachRepo.saveAll(postAttaches)
         }catch (e: FeignClientException){
             throw e
@@ -94,6 +97,9 @@ class PostServicesImpl(
     override fun update(id: Long, request: PostUpdateRequest) {
         try{
             repository.findByIdAndDeletedFalse(id)?.let { post ->
+                val currentUserId = securityUtil.getCurrentUserId()
+                if (post.userId != currentUserId)
+                    throw PostNotYoursException()
                 request.text?.let { post.text = it
                                     repository.save(post)}
 
@@ -111,7 +117,7 @@ class PostServicesImpl(
 
                     // yangi rasmlarni bazaga qoshish
                     if (hashesToAdd.isNotEmpty()) {
-                        attachClient.listExists(hashesToAdd)
+                        attachClient.listExists(InternalHashesCheckRequest(currentUserId, hashesToAdd))
                         val postAttachesToAdd: MutableList<PostAttach> = mutableListOf()
                         hashesToAdd.forEach { hash ->
                             postAttachesToAdd.add(PostAttach(hash, post))
@@ -129,7 +135,11 @@ class PostServicesImpl(
     }
     @Transactional
     override fun delete(id: Long) {
+        val currentUserId = securityUtil.getCurrentUserId()
         repository.findByIdAndDeletedFalse(id)?.let { post ->
+            if (currentUserId != post.userId){
+                throw PostNotYoursException()
+            }
             val postAttachHash = postAttachRepo.getPostAttachHash(id)
             repository.trash(post.id!!)
             userClient.decrementUserPostCount(post.userId)
@@ -169,16 +179,17 @@ class PostServicesImpl(
     override fun postLike(request: PostLikeRequest) {
         try{
             repository.findByIdAndDeletedFalse(request.postId)?.let { post ->
-                userClient.exists(request.userId).takeIf { it }?.let {
-                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedTrue(post.id!!, request.userId)?.let { postLike ->
+                val currentUserId = securityUtil.getCurrentUserId()
+                userClient.exists(currentUserId).takeIf { it }?.let {
+                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedTrue(post.id!!, currentUserId)?.let { postLike ->
                         repository.incrementLike(post.id!!)
                         postLike.deleted = false
                         postLikeRepo.save(postLike)
                         return
                     }
-                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedFalse(post.id!!, request.userId)?.let {throw UserAlreadyLikedException() }
+                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedFalse(post.id!!, currentUserId)?.let {throw UserAlreadyLikedException() }
 
-                    postLikeRepo.save(PostLike(request.userId, post))
+                    postLikeRepo.save(PostLike(currentUserId, post))
                     repository.incrementLike(post.id!!)
                     return
                 }
@@ -192,8 +203,9 @@ class PostServicesImpl(
     override fun postDislike(request: PostDislikeRequest) {
         try {
             repository.findByIdAndDeletedFalse(request.postId)?.let { post ->
-                userClient.exists(request.userId).takeIf { it }?.let {
-                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedFalse(post.id!!, request.userId)?.let { postLike ->
+                val currentUserId = securityUtil.getCurrentUserId()
+                userClient.exists(currentUserId).takeIf { it }?.let {
+                    postLikeRepo.findPostLikeByPostIdAndUserIdAndDeletedFalse(post.id!!, currentUserId)?.let { postLike ->
                         repository.decrementLike(post.id!!)
                         postLike.deleted = true
                         postLikeRepo.save(postLike)

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -13,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain
 
 
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 class ResourceServerConfig(
     private val objectMapper: ObjectMapper
 ) {

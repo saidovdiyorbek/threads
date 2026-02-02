@@ -14,6 +14,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authorization.AuthorizationContext
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository
 import org.springframework.web.server.WebFilter
+import reactor.core.publisher.Mono
 import kotlin.apply
 import kotlin.collections.all
 import kotlin.collections.set
@@ -37,6 +38,13 @@ class SecurityConfig {
                 server.jwt {
                     it.jwtAuthenticationConverter(jwtAuthenticationConverter)
                 }
+                server.authenticationEntryPoint { exchange, ex ->
+                    println("Auth error: ${ex.message}")
+                    ex.printStackTrace()
+                    return@authenticationEntryPoint Mono.fromRunnable { ex
+                        exchange.response.statusCode = org.springframework.http.HttpStatus.UNAUTHORIZED
+                    }
+                }
             }
             .authorizeExchange {
                 it
@@ -44,6 +52,7 @@ class SecurityConfig {
                     .pathMatchers("/api/v1/auth/user/register").permitAll()
                     .pathMatchers("/api/v1/auth/oauth2/**").permitAll()
                     .pathMatchers("/error").permitAll()
+                    .pathMatchers("/api/v1/posts/**").permitAll()
                     .anyExchange().access(monoPathManager())
             }.build()
     }

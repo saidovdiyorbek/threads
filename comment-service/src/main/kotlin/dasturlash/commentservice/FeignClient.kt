@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 
-@FeignClient(name = "user-service", url = "\${services.hosts.user}/internal/api/v1/users")
+@FeignClient(name = "user-service", url = "\${services.hosts.user}/internal/api/v1/users", configuration = [FeignOAuth2TokenConfig::class])
 interface UserClient {
     @GetMapping("/{id}/exists")
     fun exists(@PathVariable id: Long): Boolean
@@ -17,7 +17,7 @@ interface UserClient {
     fun getUserShortInfo(@PathVariable id: Long): UserShortInfo?
 }
 
-@FeignClient(name = "post-service", url = "\${services.hosts.post}/internal/api/v1/posts")
+@FeignClient(name = "post-service", url = "\${services.hosts.post}/internal/api/v1/posts", configuration = [FeignOAuth2TokenConfig::class])
 interface PostClient {
     @GetMapping("/{id}/exists")
     fun exists(@PathVariable id: Long): Boolean
@@ -29,13 +29,13 @@ interface PostClient {
     fun decrementPostComment(@PathVariable id: Long)
 }
 
-@FeignClient(name = "attach-service", url = "\${services.hosts.attach}/internal/api/v1/attaches")
+@FeignClient(name = "attach-service", url = "\${services.hosts.attach}/internal/api/v1/attaches", configuration = [FeignOAuth2TokenConfig::class])
 interface AttachClient{
-    @GetMapping("/{hash}/exists")
-    fun exists(@PathVariable hash: String): Boolean
+    @PostMapping("/exists")
+    fun exists(@RequestBody hash: InternalHashCheckRequest): Boolean
 
     @PostMapping("/hashes/exists")
-    fun listExists(@RequestBody hashes: List<String>): Boolean
+    fun listExists(@RequestBody hashes: InternalHashesCheckRequest): Boolean
 
     @DeleteMapping("/deleteList")
     fun deleteList(@RequestBody hashes: List<String>)

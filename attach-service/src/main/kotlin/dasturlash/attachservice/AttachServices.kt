@@ -19,8 +19,8 @@ interface AttachService {
     fun createAttach(file: MultipartFile, hash: String, extension: String, pathFolder: String, fullPath: String): Attach
     fun openUrl(hash: String): String
     fun isExists(hash: String): Boolean
-    fun exists(hash: String): Boolean
-    fun listExists(hashes: List<String>): Boolean
+    fun exists(hash: InternalHashCheckRequest): Boolean
+    fun listExists(hashes: InternalHashesCheckRequest): Boolean
     fun deleteList(hashes: List<String>)
     fun deleteFileFromFolder(folder: String, fileName: String): Boolean
 }
@@ -31,7 +31,8 @@ class AttachServiceImpl(
     @Value("\${attach.url}")private val attachUrl: String,
 
     private val repository: AttachRepository,
-    private val hash: GenerateHash
+    private val hash: GenerateHash,
+    private val securityUtil: SecurityUtil,
 ) : AttachService {
     @Transactional
     override fun upload(files: List<MultipartFile>): List<AttachUrl> {
@@ -103,6 +104,7 @@ class AttachServiceImpl(
             path = "$folderName/$pathFolder",
             hash = hash,
             fullPath = fullPath,
+            userId = securityUtil.getCurrentUserId()
         ))
         return attach
     }
@@ -118,16 +120,18 @@ class AttachServiceImpl(
         return repository.existsByHashAndDeletedFalse(hash)
     }
 
-    override fun exists(hash: String): Boolean {
-        repository.existsByHashAndDeletedFalse(hash).takeIf { it }?.let {
+    override fun exists(hash: InternalHashCheckRequest): Boolean {
+        repository.existsByHashAndUserIdAndDeletedFalse(hash.hash,hash.userId).takeIf { it }?.let {
+            println("Attach topildi")
             return true
         }
+        println("Attach topilmadi")
         throw AttachNotFoundException()
     }
 
-    override fun listExists(hashes: List<String>): Boolean {
-        val existsHashCount = repository.existsHashList(hashes)
-        if (existsHashCount == hashes.size.toLong()) {
+    override fun listExists(hashes: InternalHashesCheckRequest): Boolean {
+        val existsHashCount = repository.existsHashList(hashes.hashes, hashes.userId)
+        if (existsHashCount != null && existsHashCount == hashes.hashes.size.toLong()) {
             return true
         }
         return false

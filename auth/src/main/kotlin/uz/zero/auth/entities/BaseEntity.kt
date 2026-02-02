@@ -22,10 +22,10 @@ import java.util.Date
 @EntityListeners(AuditingEntityListener::class)
 class BaseEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null,
-    @CreatedDate @Temporal(TemporalType.TIMESTAMP) var createdDate: Date? = null,
-    @LastModifiedDate @Temporal(TemporalType.TIMESTAMP) var modifiedDate: Date? = null,
-    @CreatedBy var createdBy: Long? = null,
-    @LastModifiedBy var lastModifiedBy: Long? = null,
-    @Column(nullable = false) @ColumnDefault(value = "false") var deleted: Boolean = false
-) : Serializable
+    @CreatedDate @Temporal(TemporalType.TIMESTAMP)var createdDate: Date? = null,
+    @LastModifiedDate @Temporal(TemporalType.TIMESTAMP)var lastModifiedDate: Date? = null,
+    @CreatedBy var createdBy: String? = null,
+    @LastModifiedBy var lastModifiedBy: String? = null,
+    @Column(nullable = false) @ColumnDefault(value = "false") var deleted: Boolean = false,
+)
 

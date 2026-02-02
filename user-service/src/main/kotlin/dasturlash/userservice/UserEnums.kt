@@ -15,5 +15,7 @@ enum class UserStatus {
 }
 
 enum class UserRole{
-    ROLE_ADMIN, ROLE_USER, ROLE_PUBLISHER
+    ROLE_ADMIN, ROLE_USER, ROLE_PUBLISHER, USER,
+    ADMIN,
+    DEVELOPER,
 }

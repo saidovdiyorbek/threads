@@ -13,7 +13,6 @@ data class CommentCreateRequest(
     val text: String? = null,
     @field:Size(max = 20, message = "Image max 20")
     val hashes: List<String>? = null,
-    val userId: Long,
     val postId: Long,
     val parentId: Long? = null,
 )
@@ -70,7 +69,6 @@ data class ParentCommentsResponse(
 )
 
 data class LikeRequest(
-    val userId: Long,
     val commentId: Long,
 )
 
@@ -79,4 +77,14 @@ data class UserInfoResponse(
     val fullName: String,
     val username: String,
     val role: String,
+)
+
+data class InternalHashCheckRequest(
+    val userId: Long,
+    val hash: String,
+)
+
+data class InternalHashesCheckRequest(
+    val userId: Long,
+    val hashes: List<String>
 )

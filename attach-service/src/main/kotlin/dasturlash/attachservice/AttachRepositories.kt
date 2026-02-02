@@ -47,11 +47,11 @@ class BaseRepositoryImpl<T : BaseEntity>(
 }
 
 interface AttachRepository : BaseRepository<Attach>{
-    fun existsByHashAndDeletedFalse(hash: String): Boolean
+    fun existsByHashAndUserIdAndDeletedFalse(hash: String, userId: Long): Boolean
     @Query("""
-        select  count(a) from Attach a where a.hash in ?1
+        select  count(a) from Attach a where a.hash in ?1 and a.userId = ?2
     """)
-    fun existsHashList(hashes: List<String>): Long
+    fun existsHashList(hashes: List<String>, userId: Long): Long?
 
     @Modifying
     @Query("""
@@ -60,4 +60,5 @@ interface AttachRepository : BaseRepository<Attach>{
     fun deleteByHashList(hashes: List<String>)
 
     fun findAttachByHashAndDeletedTrue(hash: String): Attach?
+    fun existsByHashAndDeletedFalse(hash: String): Boolean
 }

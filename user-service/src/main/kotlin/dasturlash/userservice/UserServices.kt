@@ -22,8 +22,10 @@ interface UserServices {
 class UserServiceImpl(
     private val repository: UserRepository,
     private val userFollow: UserFollowRepository,
+    private val securityUtil: SecurityUtil,
 
 ) : UserServices {
+    @Transactional
     override fun create(request: UserCreateRequest) {
         repository.existsByUsername(request.username).takeIf { it }?.let {
             throw UsernameAlreadyExistsException()
@@ -33,7 +35,7 @@ class UserServiceImpl(
         }
 
         repository.save(User(
-            fullname = request.fullName?.let { it } as String,
+            fullName = request.fullName?.let { it } as String,
             username = request.username,
             email = request.email,
             password = request.password,
@@ -42,12 +44,12 @@ class UserServiceImpl(
             role = request.role,
         ))
     }
-
+    @Transactional
     override fun getOne(id: Long): UserResponse {
         repository.findByIdFull(id)?.let { user ->
             return UserResponse(
                 user.id!!,
-                user.fullname?.let { it },
+                user.fullName?.let { it },
                 user.username,
                 user.email,
                 user.bio?.let { it } as String,
@@ -63,7 +65,7 @@ class UserServiceImpl(
         repository.findAll().forEach { user ->
             findUser.add(UserResponse(
                 id = user.id!!,
-                fullName = user.fullname?.let { it } as String,
+                fullName = user.fullName?.let { it } as String,
                 username = user.username,
                 email = user.email,
                 bio = user.bio?.let { it } as String,
@@ -79,7 +81,7 @@ class UserServiceImpl(
             request.username?.let { repository.existsByUsername(it).takeIf { it }?.let {
                 throw UsernameAlreadyExistsException()
                 }
-                user.fullname = it
+                user.fullName = it
             }
             request.email?.let { repository.existsByEmail(it).takeIf { it }?.let {
                 throw EmailAlreadyExistsException()
@@ -100,11 +102,12 @@ class UserServiceImpl(
     }
     @Transactional
     override fun follow(followRequest: FollowRequest) {
-        repository.findByIdAndDeletedFalse(followRequest.profileId)?.let { profile ->
+        val currentUserId = securityUtil.getCurrentUserId()
+        repository.findByIdAndDeletedFalse(currentUserId)?.let { profile ->
             // follow bosilayotgan profile user ekanligini tekshirayapmiz
             repository.findByIdAndRoleUser(followRequest.followId)?.let { follow ->
-                val checkFollowing = userFollow.checkFollowing(followRequest.profileId, followRequest.followId)
-                if (!checkFollowing && followRequest.profileId != followRequest.followId) {
+                val checkFollowing = userFollow.checkFollowing(currentUserId, followRequest.followId)
+                if (!checkFollowing && currentUserId != followRequest.followId) {
                     userFollow.save(UserFollow(
                         // follow qilayotgan user
                         profile = profile,
@@ -113,7 +116,7 @@ class UserServiceImpl(
                     ))
 
                     repository.incrementFollowers(followRequest.followId)
-                    repository.incrementFollowing(followRequest.profileId)
+                    repository.incrementFollowing(currentUserId)
                     return
                 }
                 throw UserAlreadyFollowedOrSelfFollowException()
@@ -124,14 +127,15 @@ class UserServiceImpl(
     }
     @Transactional
     override fun unfollow(unfollowRequest: UnfollowRequest) {
-        repository.findByIdAndDeletedFalse(unfollowRequest.profileId)?.let { profile ->
+        val currentUserId = securityUtil.getCurrentUserId()
+        repository.findByIdAndDeletedFalse(currentUserId)?.let { profile ->
             // follow bosilayotgan profile user ekanligini tekshirayapmiz
-            repository.findByIdAndRoleUser(unfollowRequest.followId)?.let { follow ->
-                userFollow.checkUnFollowing(unfollowRequest.profileId, unfollowRequest.followId)?.let {
-                    if (unfollowRequest.profileId != unfollowRequest.followId) {
+            repository.findByIdAndRoleUser(unfollowRequest.unFollowId)?.let { follow ->
+                userFollow.checkUnFollowing(currentUserId, unfollowRequest.unFollowId)?.let {
+                    if (currentUserId != unfollowRequest.unFollowId) {
                         userFollow.delete(it)
-                        repository.decrementFollowers(unfollowRequest.followId)
-                        repository.decrementFollowing(unfollowRequest.profileId)
+                        repository.decrementFollowers(unfollowRequest.unFollowId)
+                        repository.decrementFollowing(currentUserId)
                         return
                     }
                 }
@@ -150,7 +154,7 @@ class UserServiceImpl(
 
             return ProfileResponse(
                 id = user.id!!,
-                fullName = user.fullname?.let { it } as String,
+                fullName = user.fullName?.let { it } as String,
                 username = user.username,
                 postCount = posts,
                 followersCount = followers,

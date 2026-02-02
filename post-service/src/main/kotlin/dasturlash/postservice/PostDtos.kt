@@ -13,8 +13,6 @@ data class BaseMessage(val code: Int?, val message: String? = null){
 data class PostCreateRequest(
     @field:Size(min = 1, max = 255, message = "Text must be between 1 and 255")
     val text: String? = null,
-    @field:NotNull
-    val userId: Long,
     val parentId: Long? = null,
     @field:Size(max = 20, message = "Image max 20")
     val hashIds: List<String>? = null,
@@ -36,12 +34,10 @@ data class PostUpdateRequest(
 )
 
 data class PostLikeRequest(
-    val userId: Long,
     val postId: Long,
 )
 
 data class PostDislikeRequest(
-    val userId: Long,
     val postId: Long,
 )
 
@@ -68,4 +64,14 @@ data class UserInfoResponse(
     val fullName: String,
     val username: String,
     val role: String,
+)
+
+data class InternalHashesCheckRequest(
+    val userId: Long,
+    val hashes: List<String>
+)
+
+data class InternalHashCheckRequest(
+    val userId: Long,
+    val hash: String,
 )

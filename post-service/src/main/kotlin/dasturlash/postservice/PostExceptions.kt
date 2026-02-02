@@ -119,3 +119,6 @@ class UserAlreadyLikedException : PostAppException() {
 class UserAlreadyDislikedException : PostAppException() {
     override fun errorType() = ErrorCode.USER_ALREADY_DISLIKED
 }
+class PostNotYoursException : PostAppException() {
+    override fun errorType() = ErrorCode.POST_NOT_YOURS
+}

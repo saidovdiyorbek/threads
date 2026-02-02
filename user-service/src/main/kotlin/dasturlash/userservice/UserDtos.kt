@@ -63,16 +63,12 @@ data class UserUpdateRequest(
 
 data class FollowRequest(
     @field:NotNull
-    val profileId: Long,
-    @field:NotNull
     val followId: Long
 )
 
 data class UnfollowRequest(
     @field:NotNull
-    val profileId: Long,
-    @field:NotNull
-    val followId: Long
+    val unFollowId: Long
 )
 
 data class ProfileResponse(

@@ -1,5 +1,14 @@
 package dasturlash.commentservice
 
 enum class ErrorCode(val code: Int, val message: String) {
-    COMMENT_NOT_FOUND(100, "COMMENT_NOT_FOUND")
+    COMMENT_NOT_FOUND(100, "COMMENT_NOT_FOUND"),
+    ALREADY_LIKED_COMMENT(102, "ALREADY_LIKED_COMMENT"),
+    ALREADY_UNLIKED_COMMENT(103, "ALREADY_UNLIKED_COMMENT"),
+    COMMENT_NOT_YOURS(104, "COMMENT_NOT_YOURS"),
+}
+
+enum class UserRole{
+    ROLE_ADMIN, ROLE_USER, ROLE_PUBLISHER, USER,
+    ADMIN,
+    DEVELOPER,
 }

@@ -21,3 +21,13 @@ data class UserInfoResponse(
     val username: String,
     val role: String,
 )
+
+data class InternalHashesCheckRequest(
+    val userId: Long,
+    val hashes: List<String>
+)
+
+data class InternalHashCheckRequest(
+    val userId: Long,
+    val hash: String,
+)

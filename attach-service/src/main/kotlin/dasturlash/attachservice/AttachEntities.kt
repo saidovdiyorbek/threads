@@ -36,4 +36,5 @@ class Attach(
     @Column(nullable = false) var path: String,
     @Column(nullable = false) var fullPath: String,
     @Column(nullable = false) var hash: String,
+    @Column(nullable = false) val userId: Long,
 ) : BaseEntity()

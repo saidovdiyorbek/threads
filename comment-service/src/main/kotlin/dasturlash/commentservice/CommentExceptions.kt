@@ -114,4 +114,13 @@ sealed class CommentAppException(message: String? = null) : RuntimeException() {
 class CommentNotFoundException() : CommentAppException() {
     override fun errorType() = ErrorCode.COMMENT_NOT_FOUND
 }
+class AlreadyLikedCommentException() : CommentAppException() {
+    override fun errorType() = ErrorCode.ALREADY_LIKED_COMMENT
+}
+class AlreadyUnlikedCommentException() : CommentAppException() {
+    override fun errorType() = ErrorCode.ALREADY_UNLIKED_COMMENT
+}
+class CommentNotYoursException() : CommentAppException() {
+    override fun errorType() = ErrorCode.COMMENT_NOT_YOURS
+}
 

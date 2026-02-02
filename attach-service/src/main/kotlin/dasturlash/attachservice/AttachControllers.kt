@@ -1,6 +1,7 @@
 package dasturlash.attachservice
 
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile
 class AttachController(
     private val service: AttachService
 ){
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/upload",
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun upload(@RequestParam("files") files: List<MultipartFile>): List<AttachUrl> =
@@ -28,11 +30,11 @@ class AttachController(
 class AttachInternalController(
     private val service: AttachService
 ){
-    @GetMapping("/{hash}/exists")
-    fun exists(@PathVariable hash: String): Boolean = service.exists(hash)
+    @PostMapping("/exists")
+    fun exists(@RequestBody hash: InternalHashCheckRequest): Boolean = service.exists(hash)
 
     @PostMapping("/hashes/exists")
-    fun listExists(@RequestBody hashes: List<String>): Boolean = service.listExists(hashes)
+    fun listExists(@RequestBody hashes: InternalHashesCheckRequest): Boolean = service.listExists(hashes)
 
     @DeleteMapping("/deleteList")
     fun deleteList(@RequestBody hashes: List<String>) = service.deleteList(hashes)
