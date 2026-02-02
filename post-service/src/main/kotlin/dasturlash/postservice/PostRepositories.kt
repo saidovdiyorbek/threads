@@ -78,6 +78,12 @@ interface PostRepository : BaseRepository<Post>{
         update Post p set p.deleted = true where p.post.id = :postId
     """)
     fun deletePostByPostId(postId: Long)
+
+    @Modifying
+    @Query("""update Post p set p.deleted = true
+        where p.id in (select p.id from Post p where p.post.id = :parentId)
+    """)
+    fun findPostByParentId(parentId: Long)
 }
 
 @Repository

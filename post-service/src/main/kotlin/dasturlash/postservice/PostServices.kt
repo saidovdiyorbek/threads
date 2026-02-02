@@ -135,20 +135,26 @@ class PostServicesImpl(
     }
     @Transactional
     override fun delete(id: Long) {
-        val currentUserId = securityUtil.getCurrentUserId()
-        repository.findByIdAndDeletedFalse(id)?.let { post ->
-            if (currentUserId != post.userId){
-                throw PostNotYoursException()
+        try{
+            val currentUserId = securityUtil.getCurrentUserId()
+            repository.findByIdAndDeletedFalse(id)?.let { post ->
+                if (currentUserId != post.userId) {
+                    throw PostNotYoursException()
+                }
+                val postAttachHash = postAttachRepo.getPostAttachHash(id)
+                repository.trash(post.id!!)
+                //child postlarni ochirish
+                repository.findPostByParentId(id)
+                userClient.decrementUserPostCount(post.userId)
+                if (postAttachHash.isNotEmpty()) {
+                    attachClient.deleteList(postAttachHash)
+                }
+                return
             }
-            val postAttachHash = postAttachRepo.getPostAttachHash(id)
-            repository.trash(post.id!!)
-            userClient.decrementUserPostCount(post.userId)
-            if (postAttachHash.isNotEmpty()){
-                attachClient.deleteList(postAttachHash)
-            }
-            return
+            throw PostNotFoundException()
+        }catch (e: FeignClientException){
+            throw e
         }
-        throw PostNotFoundException()
     }
 
     override fun getUserPosts(userId: Long): UserPostsResponse {
