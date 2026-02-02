@@ -1,6 +1,8 @@
 package dasturlash.attachservice
 
+import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,7 +25,8 @@ class AttachController(
     fun upload(@RequestParam("files") files: List<MultipartFile>): List<AttachUrl> =
         service.upload(files)
 
-}
+    @GetMapping("/download/{fileName}")
+    fun downloadFile(@PathVariable hash: String): ResponseEntity<Resource> = service.download(hash)
 
 @RestController
 @RequestMapping("/internal/api/v1/attaches")
@@ -38,4 +41,4 @@ class AttachInternalController(
 
     @DeleteMapping("/deleteList")
     fun deleteList(@RequestBody hashes: List<String>) = service.deleteList(hashes)
-}
+}}

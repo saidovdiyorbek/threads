@@ -2,6 +2,8 @@ package dasturlash.attachservice
 
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -23,6 +25,7 @@ interface AttachService {
     fun listExists(hashes: InternalHashesCheckRequest): Boolean
     fun deleteList(hashes: List<String>)
     fun deleteFileFromFolder(folder: String, fileName: String): Boolean
+    fun download(hash: String): ResponseEntity<Resource>
 }
 
 @Service
@@ -159,5 +162,9 @@ class AttachServiceImpl(
             println("Problem delete file ${e.message}")
             false
         }
+    }
+
+    override fun download(hash: String): ResponseEntity<Resource> {
+        TODO("Not yet implemented")
     }
 }
